@@ -1,5 +1,5 @@
 <template>
-  <section class="epilogue-wrap chapter" :id="id">
+  <section class="epilogue-wrap chapter" :id="id" :class="{ 'english-copy': language === 'en' }" :lang="language === 'en' ? 'en' : 'zh-CN'">
     <!-- 背景图（带模糊+透明度） -->
     <div class="ep-bg">
       <img class="ep-bg-img" :src="bgImageUrl" alt="" />
@@ -14,7 +14,7 @@
     <!-- 内容层 -->
     <div class="epilogue-inner" ref="contentRef">
       <header class="ep-header" ref="headerRef">
-        <div class="ep-kicker" ref="kickerRef">结 · 语</div>
+        <div class="ep-kicker" ref="kickerRef">{{ t('结 · 语') }}</div>
         <h1 class="ep-title" ref="titleRef">
           <span v-for="(ch, i) in titleChars" :key="'t'+i" class="ep-title-ch" :ref="el => titleCharRefs[i] = el">{{ ch }}</span>
         </h1>
@@ -23,7 +23,7 @@
           <span class="ep-dot"></span>
           <span class="ep-dline right"></span>
         </div>
-        <div class="ep-subtitle" ref="subRef">山水孕育名茶 · 古道承载流通 · 山海联结世界</div>
+        <div class="ep-subtitle" ref="subRef">{{ t('山水孕育名茶 · 古道承载流通 · 山海联结世界') }}</div>
       </header>
 
       <div class="ep-body" ref="bodyRef">
@@ -38,7 +38,7 @@
 
       <!-- 结语底部提示 -->
       <div class="ep-hint" ref="hintRef">
-        <span class="ep-hint-text">旅程至此，愿茶香常伴</span>
+        <span class="ep-hint-text">{{ t('旅程至此，愿茶香常伴') }}</span>
       </div>
     </div>
   </section>
@@ -47,11 +47,13 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { useLanguage } from '../utils/language.js'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { assetUrl } from '../utils/base.js'
 
 gsap.registerPlugin(ScrollTrigger)
+const { language, t } = useLanguage()
 
 defineProps({ id: { type: String, required: true } })
 
@@ -59,15 +61,17 @@ const router = useRouter()
 
 const bgImageUrl = assetUrl('data/peggy_marco-tea-1028741_1920.jpg')
 
-const title = '茶香万里'
-const titleChars = title.split('')
+const titleChars = computed(() => language.value === 'en'
+  ? t('茶香万里').split(' ').map(word => word + ' ')
+  : Array.from(t('茶香万里')))
 const titleCharRefs = []
 
-const paragraphs = [
+const sourceParagraphs = [
   '一程茶旅至此落幕，山水孕育名茶，古道承载流通，山海联结世界，六个篇章串联起中国茶叶从古至今的发展全貌。从山野间初生的嫩芽，到历代名士追捧的传世名茶，再到规模化种植、远销海外的现代产业，茶叶早已超越饮品本身，成为串联自然地理、人文历史与跨国交流的特殊纽带。',
   '一方水土养一方好茶，云雾山间的坚守延续着传统制茶技艺，规模化茶园与外贸渠道赋予茶业全新活力，漂洋过海之后，中式饮茶习惯落地生根，融合各地风俗演变出多元茶文化，让清醇茶香成为全人类共赏的美好滋味。',
   '地图的刻度记录着茶区的变迁，这趟线上茶史漫游，既是回望先辈依山种茶、以茶通商的过往，也是看见当代茶业蓬勃生长的新生。茶文化从未止步于历史，它始终在传承中创新，在开放中交融。愿这片小小茶叶承载的从容雅致，能伴随日常烟火延续下去，期待未来茶香继续跨越山海，书写更多文明互通、风味共享的崭新篇章。',
 ]
+const paragraphs = computed(() => sourceParagraphs.map(t))
 const paraRefs = []
 
 const px1Ref = ref(null)
@@ -171,6 +175,11 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.english-copy .ep-header { width: 100%; }
+.english-copy .ep-title { max-width: 100%; flex-wrap: wrap; }
+.english-copy .ep-title-ch { white-space: nowrap; }
+.english-copy .ep-subtitle { white-space: normal; }
+
 .epilogue-wrap {
   position: relative;
   min-height: 100vh;

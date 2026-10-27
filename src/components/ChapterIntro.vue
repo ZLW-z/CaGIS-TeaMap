@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import gsap from 'gsap'
 
 const props = defineProps({
@@ -47,9 +47,11 @@ const chNoRef = ref(null)
 const titleRowRef = ref(null)
 const descRef = ref(null)
 
-const titleChars = props.title.split('')
+const titleChars = computed(() => /[\u4e00-\u9fff]/.test(props.title)
+  ? Array.from(props.title)
+  : props.title.split(' ').map(word => word + ' '))
 const charRefs = []
-const descLines = props.desc.split(/\r?\n/).filter(Boolean)
+const descLines = computed(() => props.desc.split(/\r?\n/).filter(Boolean))
 const descLineRefs = []
 
 let tl = null
@@ -63,7 +65,7 @@ onMounted(async () => {
   gsap.set(chNoRef.value, { opacity: 0, y: -18, scale: 0.72, filter: 'blur(3px)' })
   gsap.set(descLineRefs, { opacity: 0, y: 18, filter: 'blur(3px)' })
 
-  const charStagger = Math.min(0.13, 0.6 / Math.max(1, titleChars.length))
+  const charStagger = Math.min(0.13, 0.6 / Math.max(1, titleChars.value.length))
 
   tl = gsap.timeline({
     onComplete: () => {

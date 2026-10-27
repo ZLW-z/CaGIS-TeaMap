@@ -5,17 +5,20 @@
     :class="[`chapter-corner-intro--${chapterKey}`, { 'is-visible': visible }]"
     aria-hidden="true"
   >
-    <div class="chapter-corner-heading">
+    <div class="chapter-corner-heading keep-chinese">
       <span class="chapter-corner-number">{{ chapter.number }}</span>
       <h1 class="chapter-corner-title">{{ chapter.title }}</h1>
     </div>
     <div class="chapter-corner-rule"></div>
-    <p class="chapter-corner-description">{{ chapter.description }}</p>
+    <p v-if="englishChapter" class="chapter-corner-description chapter-corner-title-en" lang="en">{{ t(chapter.title) }}</p>
+    <p class="chapter-corner-description">{{ englishChapter ? t(chapter.description) : chapter.description }}</p>
   </header>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { useLanguage } from '../utils/language.js'
+const { language, t } = useLanguage()
 import { getChapterMeta } from '../data/chapterMeta.js'
 
 const props = defineProps({
@@ -23,6 +26,7 @@ const props = defineProps({
   visible: { type: Boolean, default: false }
 })
 
+const englishChapter = computed(() => ['ch1', 'ch2', 'ch3'].includes(props.chapterKey) && language.value === 'en')
 const chapter = computed(() => getChapterMeta(props.chapterKey))
 </script>
 

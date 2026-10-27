@@ -1,8 +1,8 @@
 <template>
   <div id="app-root">
     <!-- 顶部导航栏 -->
-    <nav class="top-nav">
-      <div class="nav-brand">
+    <nav class="top-nav" :class="{ 'english-copy': language === 'en' }">
+      <div class="nav-brand keep-chinese">
         <span class="brand-icon">
           <img
             :src="assetUrl('images/site-logo.png')"
@@ -47,8 +47,8 @@
                  → 无论显示圆点还是胶囊，按钮都占同样空间
                  → 相邻符号边缘间距离保持一致 -->
             <span class="nav-pill nav-pill--spacer" aria-hidden="true">
-              <span v-if="!r.isBookend" class="nav-pill-num">{{ r.idx }}</span>
-              <span class="nav-pill-label">{{ r.label }}</span>
+              <span v-if="!r.isBookend" class="nav-pill-num">{{ language === 'en' ? ['I', 'II', 'III', 'IV', 'V', 'VI'][i - 1] : r.idx }}</span>
+              <span class="nav-pill-label">{{ t(r.label) }}</span>
             </span>
 
             <!-- 默认态：双描边圆点（位于按钮中心） -->
@@ -57,8 +57,8 @@
             </span>
             <!-- 激活/悬浮态：圆角矩形标签（同样位于按钮中心，叠在占位符上） -->
             <span class="nav-pill nav-pill--visible">
-              <span v-if="!r.isBookend" class="nav-pill-num">{{ r.idx }}</span>
-              <span class="nav-pill-label">{{ r.label }}</span>
+              <span v-if="!r.isBookend" class="nav-pill-num">{{ language === 'en' ? ['I', 'II', 'III', 'IV', 'V', 'VI'][i - 1] : r.idx }}</span>
+              <span class="nav-pill-label">{{ t(r.label) }}</span>
             </span>
 
             <!-- 章节间装饰小圆点：定位在当前按钮右外侧（两按钮正中间） -->
@@ -68,6 +68,20 @@
             </span>
           </router-link>
         </div>
+      </div>
+      <div class="language-switch" role="group" aria-label="语言 / Language">
+        <button
+          type="button"
+          lang="zh-CN"
+          :aria-pressed="language === 'zh'"
+          @click="setLanguage('zh')"
+        >中文</button>
+        <button
+          type="button"
+          lang="en"
+          :aria-pressed="language === 'en'"
+          @click="setLanguage('en')"
+        >EN</button>
       </div>
       <div class="nav-progress">
         <div class="progress-fill" :style="{ width: progressPct + '%' }"></div>
@@ -82,22 +96,22 @@
     </router-view>
 
     <!-- 章节切换底部控制 -->
-    <div class="chapter-switch">
+    <div class="chapter-switch" :class="{ 'english-copy': language === 'en' }">
       <button
         v-if="prevRoute"
         class="switch-btn prev"
         @click="$router.push(prevRoute)"
       >
-        ← {{ prevLabel }}
+        ← {{ t(prevLabel) }}
       </button>
       <div v-else class="switch-btn hidden"></div>
-      <div class="page-indicator">{{ pageIndicatorText }}</div>
+      <div class="page-indicator">{{ t(pageIndicatorText) }}</div>
       <button
         v-if="nextRoute"
         class="switch-btn next"
         @click="$router.push(nextRoute)"
       >
-        {{ nextLabel }} →
+        {{ t(nextLabel) }} →
       </button>
       <div v-else class="switch-btn hidden"></div>
     </div>
@@ -108,6 +122,9 @@
 import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { assetUrl } from './utils/base.js'
+import { useLanguage } from './utils/language.js'
+
+const { language, setLanguage, t } = useLanguage()
 
 const route = useRoute()
 const router = useRouter()
@@ -124,6 +141,11 @@ const navItems = [
 ]
 
 const currentRoute = computed(() => route.path)
+
+watch([() => route.path, language], () => {
+  const current = navItems.find(item => item.path === route.path)
+  if (current) document.title = `山海一叶 · ${t(current.label)}`
+}, { immediate: true })
 
 // 底部显示的章节序号/计数：仅6个正文章节算入章节编号，序言结语作为首尾不计入
 const currentIdx = computed(() => {
@@ -463,6 +485,42 @@ onBeforeUnmount(() => {
   opacity: 1;
 }
 
+.language-switch {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 2px;
+  margin-left: 18px;
+  padding: 3px;
+  border: 1px solid var(--line, rgba(81, 109, 51, .18));
+  border-radius: 18px;
+}
+.language-switch button {
+  border: none;
+  border-radius: 14px;
+  padding: 5px 9px;
+  background: transparent;
+  color: var(--c-olive, #516D33);
+  font: 500 13px var(--sans);
+  line-height: 18px;
+  cursor: pointer;
+  transition: background-color .2s ease, color .2s ease;
+}
+.language-switch button[lang="en"] {
+  font-family: "Times New Roman", serif;
+}
+.language-switch button:hover {
+  background: rgba(81, 109, 51, .1);
+}
+.language-switch button[aria-pressed="true"] {
+  background: var(--c-olive, #516D33);
+  color: var(--c-paper, #EFE9DA);
+}
+.language-switch button:focus-visible {
+  outline: 2px solid var(--c-gold, #B28F4C);
+  outline-offset: 2px;
+}
+
 .nav-progress {
   position: absolute;
   bottom: 0;
@@ -542,6 +600,8 @@ onBeforeUnmount(() => {
 @media (max-width: 880px) {
   .nav-brand .brand-text { display: none; }
   .nav-track { margin-left: 12px; }
+  .language-switch { margin-left: 8px; }
+  .language-switch button { padding: 5px 6px; }
   .nav-dot { width: 14px; height: 14px; }
   /* 小屏：胶囊只显示序号，占位符和可见版都要改 */
   .nav-pill--spacer,

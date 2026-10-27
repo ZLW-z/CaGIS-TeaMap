@@ -1,9 +1,9 @@
 <template>
-  <section class="chapter chapter-3" :id="id" ref="sectionEl">
+  <section class="chapter chapter-3" :id="id" ref="sectionEl" :class="{ 'english-copy': language === 'en' }" :lang="language === 'en' ? 'en' : 'zh-CN'">
     <ChapterIntro
-      :ch-no="chapter.number"
-      :title="chapter.title"
-      :desc="chapter.description"
+      :ch-no="language === 'en' ? 'III' : chapter.number"
+      :title="t(chapter.title)"
+      :desc="t(chapter.description)"
       :duration="7"
       @done="onIntroDone"
     />
@@ -14,14 +14,14 @@
 
       <!-- 图例 -->
       <div class="map-legend">
-        <div class="legend-title">图例</div>
+        <div class="legend-title">{{ t('图例') }}</div>
         <div class="legend-row top10">
-          <span class="sw top10-sw"></span>十大名茶（{{ top10Count }}）
+          <span class="sw top10-sw"></span>{{ t('十大名茶') }}（{{ top10Count }}）
         </div>
         <div class="legend-row other">
-          <span class="sw other-sw"></span>其他名茶（{{ otherCount }}）
+          <span class="sw other-sw"></span>{{ t('其他名茶') }}（{{ otherCount }}）
         </div>
-        <div class="legend-hint">点击标记查看详情</div>
+        <div class="legend-hint">{{ t('点击标记查看详情') }}</div>
       </div>
 
       <!-- 固定信息面板 -->
@@ -33,32 +33,32 @@
           <div class="panel-header">
             <div class="panel-title-wrap">
               <span class="panel-badge" :class="{ top10: selectedTea.isTop10 }">
-                {{ selectedTea.isTop10 ? '十大名茶' : '名茶' }}
+                {{ t(selectedTea.isTop10 ? '十大名茶' : '名茶') }}
               </span>
-              <h3 class="panel-title">{{ selectedTea.name }}</h3>
+              <h3 class="panel-title">{{ teaText(selectedTea, 'name') }}</h3>
             </div>
-            <button class="panel-close" @click="closePanel">×</button>
+            <button class="panel-close" :aria-label="t('关闭信息卡')" @click="closePanel">×</button>
           </div>
 
           <div class="panel-scroll">
             <div class="panel-image-wrap" @click="openLightbox">
-              <img :src="selectedTea.image" :alt="selectedTea.name" class="panel-image" />
-              <div class="panel-image-hint">点击查看大图</div>
+              <img :src="selectedTea.image" :alt="teaText(selectedTea, 'name')" class="panel-image" />
+              <div class="panel-image-hint">{{ t('点击查看大图') }}</div>
             </div>
 
             <div class="panel-meta">
-              <span class="meta-type">{{ selectedTea.type }}</span>
-              <span class="meta-origin">{{ selectedTea.origin }}</span>
+              <span class="meta-type">{{ t(selectedTea.type) }}</span>
+              <span class="meta-origin">{{ teaText(selectedTea, 'origin') }}</span>
             </div>
 
             <div class="panel-section">
-              <div class="section-label">核心特点</div>
-              <p class="section-text">{{ selectedTea.features }}</p>
+              <div class="section-label">{{ t('核心特点') }}</div>
+              <p class="section-text">{{ teaText(selectedTea, 'features') }}</p>
             </div>
 
             <div class="panel-section">
-              <div class="section-label">故事 / 传说</div>
-              <p class="section-text story">{{ selectedTea.story }}</p>
+              <div class="section-label">{{ t('故事 / 传说') }}</div>
+              <p class="section-text story">{{ teaText(selectedTea, 'story') }}</p>
             </div>
           </div>
         </div>
@@ -73,16 +73,16 @@
         >
           <div class="preview-header">
             <span class="preview-badge" :class="{ top10: hoveredTea.isTop10 }">
-              {{ hoveredTea.isTop10 ? '十大名茶' : '名茶' }}
+              {{ t(hoveredTea.isTop10 ? '十大名茶' : '名茶') }}
             </span>
-            <h4 class="preview-title">{{ hoveredTea.name }}</h4>
+            <h4 class="preview-title">{{ teaText(hoveredTea, 'name') }}</h4>
           </div>
           <div class="preview-body">
             <div class="preview-tags">
-              <span class="preview-type">{{ hoveredTea.type }}</span>
-              <span class="preview-origin">{{ hoveredTea.origin }}</span>
+              <span class="preview-type">{{ t(hoveredTea.type) }}</span>
+              <span class="preview-origin">{{ teaText(hoveredTea, 'origin') }}</span>
             </div>
-            <p class="preview-features">{{ hoveredTea.features }}</p>
+            <p class="preview-features">{{ teaText(hoveredTea, 'features') }}</p>
           </div>
         </div>
       </transition>
@@ -113,7 +113,7 @@
               <img
                 ref="lightboxImgEl"
                 :src="selectedTea.image"
-                :alt="selectedTea.name"
+                :alt="teaText(selectedTea, 'name')"
                 class="lightbox-image"
                 draggable="false"
               />
@@ -124,15 +124,15 @@
           <button
             class="lightbox-close-corner"
             @click="closeLightbox"
-            title="关闭 (Esc)"
+            :title="t('关闭 (Esc)')"
           >×</button>
 
           <div v-if="selectedTea" class="lightbox-caption" style="display: none;">
-            <span class="lb-name">{{ selectedTea.name }}</span>
-            <span class="lb-origin">{{ selectedTea.origin }} · {{ selectedTea.type }}</span>
+            <span class="lb-name">{{ teaText(selectedTea, 'name') }}</span>
+            <span class="lb-origin">{{ teaText(selectedTea, 'origin') }} · {{ t(selectedTea.type) }}</span>
           </div>
 
-          <div class="lightbox-hint">滚轮缩放 · 拖拽平移 · 双击适应屏幕</div>
+          <div class="lightbox-hint">{{ t('滚轮缩放 · 拖拽平移 · 双击适应屏幕') }}</div>
         </div>
       </transition>
     </div>
@@ -140,12 +140,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import L from 'leaflet'
 import { createAlbersCRS } from '../utils/crs.js'
 import ChapterIntro from './ChapterIntro.vue'
 import ChapterCornerIntro from './ChapterCornerIntro.vue'
 import { CHAPTER_META } from '../data/chapterMeta.js'
+import { useLanguage } from '../utils/language.js'
+import { teaEnglish } from '../data/ch3English.js'
 import {
   TEAS,
   TEA_TYPE_COLORS,
@@ -158,6 +160,11 @@ import {
 } from '../config/ch3.js'
 
 const props = defineProps({ id: { type: String, required: true } })
+const { language, t } = useLanguage()
+
+function teaText(tea, field) {
+  return language.value === 'en' ? (teaEnglish[tea.name]?.[field] ?? t(tea[field])) : tea[field]
+}
 
 const sectionEl = ref(null)
 const mapEl = ref(null)
@@ -285,6 +292,27 @@ function onIntroDone() {
 const top10Count = TEAS.filter(t => t.isTop10).length
 const otherCount = TEAS.filter(t => !t.isTop10).length
 
+watch(language, async () => {
+  // Update labels in place so selection, ripple animations and map position survive.
+  markers.forEach(marker => {
+    const tea = marker._teaData
+    const el = marker.getElement()
+    if (!tea || !el) return
+    const name = teaText(tea, 'name')
+    const label = el.querySelector('.tea-label-text')
+    if (label) label.textContent = name
+    el.title = name
+    el.setAttribute('aria-label', name)
+    marker.options.title = name
+  })
+  await nextTick()
+  layoutLabels()
+  if (hoveredTea.value) {
+    const marker = markers.find(marker => marker._teaData.name === hoveredTea.value.name)
+    if (marker) updatePreviewPos(marker)
+  }
+})
+
 // 创建名茶标签图标：扩散圆为锚点，标签置于扩散圆上方（布局算法处理纵向避让）
 function createTeaLabelIcon(tea) {
   const isTop10 = tea.isTop10
@@ -304,7 +332,7 @@ function createTeaLabelIcon(tea) {
 
   const labelHtml = `
     <div class="tea-label-wrap tea-label--above ${isTop10 ? 'tea-label--top10' : 'tea-label--other'}" style="--tea-color:${color};--tea-ring:${ringColor}">
-      <span class="tea-label-text">${tea.name}</span>
+      <span class="tea-label-text">${teaText(tea, 'name')}</span>
       <div class="tea-ripple">
         <span class="tea-ripple-dot"></span>
         <span class="tea-ripple-ring"></span>
@@ -377,6 +405,7 @@ function initMap() {
     const style = tea.isTop10 ? TOP10_STYLE : OTHER_STYLE
     const marker = L.marker([tea.y_m, tea.x_m], {
       icon: createTeaLabelIcon(tea),
+      title: teaText(tea, 'name'),
       interactive: true,
     })
 
@@ -417,6 +446,7 @@ function initMap() {
     })
 
     marker.addTo(map)
+    marker._teaData = tea
     markers.push(marker)
   })
 
@@ -481,9 +511,9 @@ function initMap() {
  */
 function layoutLabels() {
   if (!map || markers.length === 0) return
-  const mapEl = mapEl.value
-  if (!mapEl) return
-  const mapRect = mapEl.getBoundingClientRect()
+  const mapContainer = mapEl.value
+  if (!mapContainer) return
+  const mapRect = mapContainer.getBoundingClientRect()
 
   const items = []
   markers.forEach(marker => {
@@ -1590,4 +1620,10 @@ onBeforeUnmount(() => {
   opacity: 0;
   transform: translateY(-8px);
 }
+.english-copy :deep(.tea-label-text) { font-size: calc(.8rem - 1px); }
+.english-copy .lightbox-hint { font-size: 10px; }
+.english-copy .lb-name { font-size: 14px; }
+.english-copy .lb-origin { font-size: 11px; }
+.english-copy .preview-header { flex-wrap: wrap; }
+.english-copy .preview-title { min-width: 0; max-width: 100%; }
 </style>

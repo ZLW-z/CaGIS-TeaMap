@@ -1,9 +1,9 @@
 <template>
-  <section class="chapter chapter-2">
+  <section class="chapter chapter-2" :class="{ 'english-copy': language === 'en' }" :lang="language === 'en' ? 'en' : 'zh-CN'">
     <ChapterIntro
-      :ch-no="chapter.number"
-      :title="chapter.title"
-      :desc="chapter.description"
+      :ch-no="language === 'en' ? 'II' : chapter.number"
+      :title="t(chapter.title)"
+      :desc="t(chapter.description)"
       :duration="7"
       @done="onIntroDone"
     />
@@ -33,13 +33,13 @@
                 <div
                   class="thumbnail-map"
                   :data-factor-id="thumbSlot[slotIdx - 1]"
-                  :aria-label="FACTORS[thumbSlot[slotIdx - 1]].name + '因子地图缩略图'"
+                  :aria-label="language === 'en' ? t(FACTORS[thumbSlot[slotIdx - 1]].name) + ' factor map thumbnail' : FACTORS[thumbSlot[slotIdx - 1]].name + '因子地图缩略图'"
                   :ref="el => setThumbnailMapContainer(thumbSlot[slotIdx - 1], el)"
                 ></div>
               </div>
               <div class="thumb-label">
                 <span class="thumb-order">{{ slotIdx }}</span>
-                <span class="thumb-name">{{ FACTORS[thumbSlot[slotIdx - 1]].name }}</span>
+                <span class="thumb-name">{{ t(FACTORS[thumbSlot[slotIdx - 1]].name) }}</span>
               </div>
             </div>
           </div>
@@ -54,10 +54,10 @@
           v-if="viewMode === 'composite' || activeFactorId"
         >
           <div v-if="viewMode === 'composite'" class="map-title">
-            茶树生态适宜性综合评价
+            {{ t('茶树生态适宜性综合评价') }}
           </div>
           <div v-else class="map-title">
-            {{ currentConfig.name }}适宜性分析
+            {{ language === 'en' ? t(currentConfig.name) + ' Suitability Analysis' : currentConfig.name + '适宜性分析' }}
           </div>
         </div>
 
@@ -78,7 +78,7 @@
       <div ref="toolGroupRef" class="tool-group">
         <!-- 图例：与说明卡、转盘共用右侧纵向工具列 -->
         <div v-if="showLegend" class="legend-inner">
-          <div class="legend-title" style="font-family:var(--font-body),KaiTi,STKaiti,serif !important;font-style:normal !important">{{ legendTitle }}</div>
+          <div class="legend-title" style="font-style:normal !important">{{ t(legendTitle) }}</div>
           <div
             v-for="lv in legendLevels"
             :key="lv.value"
@@ -86,14 +86,14 @@
           >
             <span class="sw" :style="{ background: lv.color }"></span>
             <div class="legend-row-text">
-              <span class="legend-label">{{ lv.label }}</span>
-              <span v-if="lv.range" class="legend-range">{{ lv.range }}</span>
+              <span class="legend-label">{{ t(lv.label) }}</span>
+              <span v-if="lv.range" class="legend-range">{{ t(lv.range) }}</span>
             </div>
           </div>
           <!-- 综合评价结论分析：仅在综合评价模式显示 -->
           <div v-if="viewMode === 'composite'" class="composite-conclusion">
-            <p>本评价综合积温、气温、降水、土壤酸碱度与光照五项关键生态因子，运用层次分析法加权建模，以此解读山川风土与茶树生长之间的契合。</p>
-            <p>纵观全国，茶树最适宜的生长之地主要集中在江南丘陵与武夷、南岭之间，以及滇南、川南一带——这里气候温润，四季分明，土壤酸度相宜，山间云雾滋养嫩芽，逐渐形成以浙江、福建、云南、四川四省为核心的中华名茶主产区。一方水土养一方茶，茶树择境而生，得天地和气，方成一叶清芳。</p>
+            <p>{{ t('本评价综合积温、气温、降水、土壤酸碱度与光照五项关键生态因子，运用层次分析法加权建模，以此解读山川风土与茶树生长之间的契合。') }}</p>
+            <p>{{ t('纵观全国，茶树最适宜的生长之地主要集中在江南丘陵与武夷、南岭之间，以及滇南、川南一带——这里气候温润，四季分明，土壤酸度相宜，山间云雾滋养嫩芽，逐渐形成以浙江、福建、云南、四川四省为核心的中华名茶主产区。一方水土养一方茶，茶树择境而生，得天地和气，方成一叶清芳。') }}</p>
           </div>
         </div>
 
@@ -162,7 +162,7 @@
                   'lbl-picked': drawOrder.includes(fid) && lockedFactor !== fid,
                 }"
               >
-                <span class="label-name">{{ FACTORS[fid].name }}</span>
+                <span class="label-name">{{ t(FACTORS[fid].name) }}</span>
                 <span
                   v-if="drawOrder.includes(fid) && lockedFactor !== fid"
                   class="picked-dot"
@@ -178,14 +178,14 @@
               :disabled="btnDisabled"
               @click.stop="onCenterClick"
             >
-              <div class="center-text">{{ centerText }}</div>
+              <div class="center-text">{{ t(centerText) }}</div>
             </button>
           </div>
         </div>
 
         <!-- 综合分析状态下的溯回按钮：右下角，取代转盘 -->
         <div v-if="viewMode === 'composite'" class="return-area">
-          <button class="return-btn" @click="onReturn">再看一遍</button>
+          <button class="return-btn" @click="onReturn">{{ t('再看一遍') }}</button>
         </div>
       </div>
 
@@ -196,16 +196,16 @@
             v-if="notesOpen && activeNote"
             class="notes-panel"
             role="dialog"
-            aria-label="数据与分类依据"
+            :aria-label="t('数据与分类依据')"
           >
             <div class="notes-head">
               <div>
-                <div class="notes-caption">数据与分类依据</div>
+                <div class="notes-caption">{{ t('数据与分类依据') }}</div>
                 <div class="notes-factor-title">{{ activeNote.title }}</div>
               </div>
               <button
                 class="notes-close"
-                aria-label="关闭注解面板"
+                :aria-label="t('关闭注解面板')"
                 @click.stop="notesOpen = false"
               >×</button>
             </div>
@@ -215,7 +215,7 @@
                 :key="f.key"
                 class="note-item"
               >
-                <div class="note-item-label">{{ f.label }}</div>
+                <div class="note-item-label">{{ t(f.label) }}</div>
                 <div v-if="f.text" class="note-item-text">{{ f.text }}</div>
                 <div v-else-if="f.key === 'classification'" class="note-item-text note-levels">
                   <div
@@ -224,21 +224,21 @@
                     class="note-level"
                   >
                     <span class="note-level-sw" :style="{ background: lv.color }"></span>
-                    <span class="note-level-label">{{ lv.label }}</span>
-                    <span v-if="lv.range" class="note-level-range">{{ lv.range }}</span>
+                    <span class="note-level-label">{{ t(lv.label) }}</span>
+                    <span v-if="lv.range" class="note-level-range">{{ t(lv.range) }}</span>
                   </div>
-                  <div v-if="noteLevelExtra" class="note-level-extra">{{ noteLevelExtra }}</div>
+                  <div v-if="noteLevelExtra" class="note-level-extra">{{ t(noteLevelExtra) }}</div>
                 </div>
               </div>
               <div v-if="activeNote.note" class="note-item">
-                <div class="note-item-label">说明</div>
+                <div class="note-item-label">{{ t('说明') }}</div>
                 <div class="note-item-text">{{ activeNote.note }}</div>
               </div>
               <div
                 v-if="activeNote.sources && activeNote.sources.length"
                 class="note-item"
               >
-                <div class="note-item-label">参考来源</div>
+                <div class="note-item-label">{{ t('参考来源') }}</div>
                 <div class="note-source-links">
                   <a
                     v-for="s in activeNote.sources"
@@ -246,7 +246,7 @@
                     :href="s.url"
                     target="_blank"
                     rel="noopener noreferrer"
-                  >{{ s.label }} ↗</a>
+                  >{{ t(s.label) }} ↗</a>
                 </div>
               </div>
             </div>
@@ -255,8 +255,8 @@
         <button
           class="notes-trigger"
           :class="{ open: notesOpen }"
-          aria-label="数据与分类依据"
-          title="数据与分类依据"
+          :aria-label="t('数据与分类依据')"
+          :title="t('数据与分类依据')"
           @click.stop="notesOpen = !notesOpen"
         >i</button>
       </div>
@@ -285,6 +285,10 @@ import {
 } from '../config/ch2.js'
 import { FACTOR_NOTES, getFactorLevels, CLASSIFICATION_EXTRA } from '../config/ch2Notes.js'
 import { getMapOptions } from '../utils/crs.js'
+import { useLanguage } from '../utils/language.js'
+import { ch2NotesEnglish } from '../data/ch2English.js'
+
+const { language, t } = useLanguage()
 
 const WHEEL_ORDER = ['ph', 'precip', 'temp', 'accum', 'rad']
 const WHEEL_SECTOR_COLORS = {
@@ -1816,7 +1820,11 @@ const activeNoteKey = computed(() => {
   if (activeFactorId.value && FACTOR_NOTES[activeFactorId.value]) return activeFactorId.value
   return 'composite'
 })
-const activeNote = computed(() => FACTOR_NOTES[activeNoteKey.value] || null)
+const activeNote = computed(() => {
+  const note = FACTOR_NOTES[activeNoteKey.value]
+  if (!note) return null
+  return language.value === 'en' ? { ...note, ...ch2NotesEnglish[activeNoteKey.value] } : note
+})
 
 const noteLevels = computed(() => getFactorLevels(activeNoteKey.value))
 const noteLevelExtra = computed(() => CLASSIFICATION_EXTRA[activeNoteKey.value] || '')
@@ -1839,6 +1847,7 @@ const noteFields = computed(() => {
 // 点击面板/按钮外部关闭
 function _onNotesDocMousedown(e) {
   if (!notesOpen.value) return
+  if (e.target.closest?.('.language-switch')) return
   const root = notesRootRef.value
   if (root && !root.contains(e.target)) notesOpen.value = false
 }
@@ -2662,5 +2671,35 @@ onBeforeUnmount(() => {
     width: auto;
     max-width: none;
   }
+}
+/* English copy uses the same controls and geometry, with whole-word wrapping. */
+#app-root .chapter-2:not(.english-copy) .legend-title {
+  font-family: var(--font-body), KaiTi, STKaiti, serif !important;
+}
+.english-copy .thumb-order { font-size: 9px; }
+.english-copy .thumb-name { font-size: 10.5px; }
+.english-copy .label-name { font-size: 14px; }
+.english-copy .center-text { font-size: 11.5px; max-width: 65px; line-height: 1.2; }
+#app-root .chapter-2.english-copy .notes-caption { font-size: 10.5px; }
+#app-root .chapter-2.english-copy .notes-factor-title { font-size: 14.5px; }
+.english-copy .note-item-label { font-size: 10.5px; }
+.english-copy :is(.note-item-text, .note-level) { font-size: 12px; }
+.english-copy :is(.note-level-range, .note-level-extra) { font-size: 10.5px; }
+.english-copy .note-source-links a { font-size: 11.5px; }
+.english-copy .note-level { flex-wrap: wrap; }
+.english-copy .note-level-label { flex: 1 1 auto; min-width: 0; }
+.english-copy .note-level-range { flex-basis: 100%; }
+.english-copy .legend-inner {
+  overflow-y: auto;
+  pointer-events: auto;
+  min-height: 0;
+}
+@media (max-width: 1200px) {
+  .english-copy .center-text { font-size: 10px; }
+  .english-copy .label-name { font-size: 12.5px; }
+}
+@media (max-width: 900px) {
+  .english-copy .thumb-name { font-size: 10px; }
+  .english-copy .label-name { font-size: 11.5px; }
 }
 </style>

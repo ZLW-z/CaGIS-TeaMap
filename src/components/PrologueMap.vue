@@ -1,5 +1,5 @@
 <template>
-  <section class="prologue-wrap chapter" :id="id">
+  <section class="prologue-wrap chapter" :id="id" :class="{ 'english-copy': language === 'en' }" :lang="language === 'en' ? 'en' : 'zh-CN'">
     <!-- 背景层（视差） -->
     <div class="bg-layer bg-layer-1" ref="bg1Ref"></div>
     <div class="bg-layer bg-layer-2" ref="bg2Ref"></div>
@@ -8,13 +8,13 @@
     <div class="prologue-inner" ref="contentRef">
       <!-- 大标题 -->
       <header class="prologue-header" ref="headerRef">
-        <div class="prologue-kicker" ref="kickerRef">序 · 言</div>
+        <div class="prologue-kicker" ref="kickerRef">{{ t('序 · 言') }}</div>
         <h1 class="prologue-title" ref="titleRef">
           <span v-for="(ch, i) in titleChars" :key="'t'+i" class="title-ch" :ref="el => titleCharRefs[i] = el">{{ ch }}</span>
         </h1>
         <div class="prologue-divider" ref="dividerRef">
           <span class="divider-line left"></span>
-          <span class="divider-leaf">茶</span>
+          <span class="divider-leaf">{{ t('茶') }}</span>
           <span class="divider-line right"></span>
         </div>
       </header>
@@ -30,7 +30,7 @@
 
       <!-- 进入提示 -->
       <div class="prologue-hint" ref="hintRef">
-        <span class="hint-text">点击按钮 · 开启图志</span>
+        <span class="hint-text">{{ t('点击按钮 · 开启图志') }}</span>
       </div>
     </div>
   </section>
@@ -39,25 +39,29 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { useLanguage } from '../utils/language.js'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
+const { language, t } = useLanguage()
 
 defineProps({ id: { type: String, required: true } })
 
 const router = useRouter()
 
-const title = '山海一叶'
-const titleChars = title.split('')
+const titleChars = computed(() => language.value === 'en'
+  ? t('山海一叶').split(' ').map(word => word + ' ')
+  : Array.from('山海一叶'))
 const titleCharRefs = []
 
-const paragraphs = [
+const sourceParagraphs = [
   '茶，是一片叶子的故事，也是大地与时间共同书写的历史。',
   '一叶嫩芽，自华夏山野破土而生，跨越千年光阴，串联起山川风物、市井烟火与万里往来。这座以地图为载体的茶史可视化站点，循着茶叶的生命脉络铺展叙事，从原生山野到世界餐桌，还原中国茶文化的生长与远行之路。',
   '开篇落笔于茶树扎根的广袤山水，探寻适配茶芽生长的水土气候密码。深入云雾缭绕的名山茶园，细数传统名茶沉淀的风味底蕴。再跟随古道车马与江河舟楫，见证一叶茶走出深山、流通四方的漫长旅途。视线拉至当下，可观现代茶园规模化建设、茶叶出口稳步拓展的产业新貌。放眼海外，便能看见茶香跨越国界，在不同国度落地生根，衍生出风格各异的饮茶习俗。',
   '我们摒弃厚重晦涩的史料堆砌，以交互式地图串联地理点位与人文故事，用舒缓雅致的视觉叙事拆解茶文化的多重维度。不必翻遍典籍，滑动页面即可走遍古今茶区，触摸藏在云雾里的制茶匠心，读懂茶叶从本土风物走向全球饮品的完整历程。愿每一位浏览者都能循着茶香，看见山水育茶的自然馈赠，感受千年传承的文化温度。',
 ]
+const paragraphs = computed(() => sourceParagraphs.map(t))
 const paraRefs = []
 
 const bg1Ref = ref(null)
@@ -97,7 +101,7 @@ onMounted(async () => {
   })
   tl.to(titleCharRefs, {
     opacity: 1, y: 0, rotateX: 0, duration: 0.7,
-    stagger: 0.12, ease: 'back.out(1.4)'
+    stagger: Math.min(0.12, 0.36 / Math.max(1, titleChars.value.length - 1)), ease: 'back.out(1.4)'
   }, '-=0.3')
   tl.to(dividerRef.value, {
     opacity: 1, scaleX: 1, duration: 0.8, ease: 'power3.out'

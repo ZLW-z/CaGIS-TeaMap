@@ -1,9 +1,9 @@
 <template>
-  <section class="page-wrap">
+  <section class="page-wrap" :class="{ 'english-copy': language === 'en' }" :lang="language === 'en' ? 'en' : 'zh-CN'">
     <ChapterIntro
-      :ch-no="chapter.number"
-      :title="chapter.title"
-      :desc="chapter.description"
+      :ch-no="language === 'en' ? 'I' : chapter.number"
+      :title="t(chapter.title)"
+      :desc="t(chapter.description)"
       :duration="7"
       @done="onIntroDone"
     />
@@ -33,25 +33,25 @@
             <i class="layer-scroll-chevron"></i>
             <i class="layer-scroll-chevron"></i>
           </span>
-          <span class="layer-scroll-hint">滚动查看其他图层</span>
+          <span class="layer-scroll-hint">{{ t('滚动查看其他图层') }}</span>
         </div>
       </div>
 
       <!-- 图例 -->
       <div class="map-legend">
-        <div class="legend-title">图 例</div>
+        <div class="legend-title">{{ t('图 例') }}</div>
         <div class="legend-row tang" :class="{ dim: stage < 1 }">
-          <span class="sw tang-sw"></span>唐代产茶区
+          <span class="sw tang-sw"></span>{{ t('唐代产茶区') }}
         </div>
-        <div class="legend-subtitle">古茶树 · 现存资源</div>
+        <div class="legend-subtitle">{{ t('古茶树 · 现存资源') }}</div>
         <div class="legend-row t1" :class="{ dim: stage < 2 }">
-          <span class="sw t-sw"></span>野生型 <span class="count">（{{ counts[1] }}）</span>
+          <span class="sw t-sw"></span>{{ t('野生型') }} <span class="count">（{{ counts[1] }}）</span>
         </div>
         <div class="legend-row t3" :class="{ dim: stage < 3 }">
-          <span class="sw t-sw t3"></span>栽培型 <span class="count">（{{ counts[3] }}）</span>
+          <span class="sw t-sw t3"></span>{{ t('栽培型') }} <span class="count">（{{ counts[3] }}）</span>
         </div>
         <div class="legend-row t2" :class="{ dim: stage < 4 }">
-          <span class="sw t-sw t2"></span>过渡/其他 <span class="count">（{{ counts[2] }}）</span>
+          <span class="sw t-sw t2"></span>{{ t('过渡/其他') }} <span class="count">（{{ counts[2] }}）</span>
         </div>
       </div>
     </div>
@@ -60,6 +60,8 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount, reactive, nextTick } from 'vue'
+import { useLanguage } from '../utils/language.js'
+const { language, t } = useLanguage()
 import L from 'leaflet'
 import gsap from 'gsap'
 import { createAlbersCRS } from '../utils/crs.js'
@@ -128,6 +130,20 @@ const LAYER_TEXTS = [
   },
 ]
 
+watch(language, async () => {
+  await nextTick()
+  const regionTooltip = tangLayer?.getTooltip?.()
+  if (regionTooltip?.isOpen()) regionTooltip.update()
+  if (tangLayer) tangLayer.eachLayer(layer => {
+    const tooltip = layer.getTooltip?.()
+    if (tooltip?.isOpen()) tooltip.update()
+  })
+  treeMarkers.forEach(marker => {
+    const popup = marker.getPopup()
+    if (popup?.isOpen()) popup.update()
+  })
+})
+
 const MIN_ZOOM_EPSILON = 0.001
 const LAYER_WHEEL_THRESHOLD = 36
 const LAYER_WHEEL_IDLE_MS = 220
@@ -193,7 +209,8 @@ function onMapWheel(event) {
 
 const currentTextItem = computed(() => {
   if (currentTextIdx.value < 0 || currentTextIdx.value >= LAYER_TEXTS.length) return null
-  return LAYER_TEXTS[currentTextIdx.value]
+  const item = LAYER_TEXTS[currentTextIdx.value]
+  return { tag: t(item.tag), title: t(item.title), desc: t(item.desc) }
 })
 
 // 播放图层文字浮现动画（参考 GSAP）
@@ -256,8 +273,11 @@ function playLayerTextAnim(idx) {
   // 标题字符逐字浮现（像 GSAP SplitText）
   if (title) {
     // 因为 inner 使用 :key 重建，无需判断 dataset.split，每次都可安全拆分
-    const chars = title.textContent.split('')
-    title.innerHTML = chars.map(ch => `<span class="ch">${ch}</span>`).join('')
+    const text = title.textContent
+    const splitChars = text => Array.from(text).map(ch => `<span class="ch">${ch}</span>`).join('')
+    title.innerHTML = language.value === 'en'
+      ? text.split(/\s+/).map(word => `<span class="english-word">${splitChars(word)}</span>`).join(' ')
+      : splitChars(text)
     const chs = title.querySelectorAll('.ch')
     if (chs && chs.length) {
       tl.fromTo(chs,
@@ -449,8 +469,8 @@ async function initMap() {
     })
     tangLayer.bindTooltip(layer => {
       const p = layer.feature.properties
-      return `<div style="font-family:var(--font-body),KaiTi,STKaiti,serif;font-style:normal;color:#516D33;padding:2px 4px">
-        <b>${p.name || ''}</b><br/><span style="font-size:11px;color:#8a8478">${p.areaLabel || ''}</span></div>`
+      return `<div style="font-family:${language.value === 'en' ? "Times New Roman" : "var(--font-body),KaiTi,STKaiti,serif"};font-style:normal;color:#516D33;padding:2px 4px">
+        <b>${t(p.name || '')}</b><br/><span style="font-size:11px;color:#8a8478">${t(p.areaLabel || '')}</span></div>`
     }, { direction: 'top', sticky: true, offset: [0, -6] })
     tangLayer.addTo(map)
   } catch (e) { console.warn('load tang areas failed:', e) }
@@ -464,9 +484,9 @@ async function initMap() {
       if (!g || !Array.isArray(g.coordinates) || g.coordinates.length < 2) return
       const [x_m, y_m] = g.coordinates
       if (typeof x_m !== 'number' || typeof y_m !== 'number' || !isFinite(x_m) || !isFinite(y_m)) return
-      const t = (f.properties && (f.properties.type || 2)) || 2
-      const s = TREE_TYPE_STYLE[t]
-      counts[t] = (counts[t] || 0) + 1
+      const treeType = (f.properties && (f.properties.type || 2)) || 2
+      const s = TREE_TYPE_STYLE[treeType]
+      counts[treeType] = (counts[treeType] || 0) + 1
       // Leaflet [lat, lng] = [y_meter, x_meter]
       const m = L.circleMarker([y_m, x_m], {
         radius: 7,
@@ -480,16 +500,16 @@ async function initMap() {
       const province = props.province
       const species = props.species
       const tn = s.label
-      m.bindPopup(
-        `<div style="font-family:var(--font-body),KaiTi,STKaiti,serif;font-style:normal;min-width:170px">
-          <b style="color:${s.color};font-family:inherit;font-style:normal">${name}</b><br/>
-          <span style="font-size:12px;color:#4a4a40">类型：${tn}</span><br/>
-          ${province ? `<span style="font-size:12px;color:#4a4a40">省份：${province}</span><br/>` : ''}
-          ${species ? `<span style="font-size:12px;color:#4a4a40;font-style:normal">学名：${species}</span><br/>` : ''}
-          <span style="font-size:11px;color:#8a8478">坐标：${(y_m/1000).toFixed(1)}km, ${(x_m/1000).toFixed(1)}km</span>
+      m.bindPopup(() =>
+        `<div style="font-family:${language.value === 'en' ? "Times New Roman" : "var(--font-body),KaiTi,STKaiti,serif"};font-style:normal;min-width:170px">
+          <b style="color:${s.color};font-family:inherit;font-style:normal">${t(name)}</b><br/>
+          <span style="font-size:12px;color:#4a4a40">${language.value === 'en' ? 'Type: ' : '类型：'}${t(tn)}</span><br/>
+          ${province ? `<span style="font-size:12px;color:#4a4a40">${language.value === 'en' ? 'Province: ' : '省份：'}${t(province)}</span><br/>` : ''}
+          ${species ? `<span style="font-size:12px;color:#4a4a40;font-style:normal">${language.value === 'en' ? 'Species: ' : '学名：'}${t(species)}</span><br/>` : ''}
+          <span style="font-size:11px;color:#8a8478">${language.value === 'en' ? 'Coordinates: ' : '坐标：'}${(y_m/1000).toFixed(1)}km, ${(x_m/1000).toFixed(1)}km</span>
         </div>`
       )
-      m._teaType = t
+      m._teaType = treeType
       m._targetFO = 0.92
       treeMarkers.push(m)
     })

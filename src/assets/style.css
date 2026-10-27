@@ -393,3 +393,49 @@ main#story{display:block;}
 #app-root :is(.map-legend, .legend-inner, .globe-legend, .modern-legend) * {
   font-size: var(--font-size-legend) !important;
 }
+
+/* English copy is one pixel smaller; Chinese titles and the brand stay intact. */
+.english-copy {
+  --font-size-body: 15px;
+  --font-size-nav: 15px;
+  --font-size-title: 23px;
+  --font-size-legend: 13px;
+}
+.english-copy .keep-chinese {
+  --font-size-body: 16px;
+  --font-size-nav: 16px;
+  --font-size-title: 24px;
+  --font-size-legend: 14px;
+}
+#app-root .english-copy,
+#app-root .english-copy :not(.keep-chinese):not(.keep-chinese *) {
+  font-family: "Times New Roman", serif !important;
+  letter-spacing: .05em !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  hyphens: none !important;
+}
+#app-root .english-copy :is(.prologue-title, .ep-title) {
+  font-size: calc(clamp(3.2rem, 9vw, 6.2rem) - 1px);
+  display: inline-flex;
+  flex-wrap: wrap;
+  max-width: 100%;
+  column-gap: .3em;
+  padding-left: 0;
+}
+#app-root .english-copy :is(.prologue-header, .ep-header) { width: 100%; }
+#app-root .english-copy :is(.title-ch, .ep-title-ch, .intro-char, .english-word) {
+  white-space: nowrap;
+}
+#app-root .english-copy .intro-title-row { column-gap: .3em; }
+#app-root .english-copy .intro-char { font-size: 99px; }
+#app-root .english-copy .intro-ch-no { font-size: 79px; }
+#app-root .english-copy .divider-leaf { font-size: 13px; }
+#app-root .english-copy .hint-text { font-size: calc(.88rem - 1px); }
+#app-root .english-copy .ep-hint-text { font-size: calc(.92rem - 1px); }
+#app-root .english-copy .chapter-corner-description {
+  font-size: var(--font-size-body) !important;
+}
+.english-copy .chapter-corner-title-en {
+  margin-bottom: 6px;
+}
