@@ -26,7 +26,7 @@ const props = defineProps({
   visible: { type: Boolean, default: false }
 })
 
-const englishChapter = computed(() => ['ch1', 'ch2', 'ch3'].includes(props.chapterKey) && language.value === 'en')
+const englishChapter = computed(() => language.value === 'en')
 const chapter = computed(() => getChapterMeta(props.chapterKey))
 </script>
 

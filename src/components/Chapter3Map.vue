@@ -163,7 +163,9 @@ const props = defineProps({ id: { type: String, required: true } })
 const { language, t } = useLanguage()
 
 function teaText(tea, field) {
-  return language.value === 'en' ? (teaEnglish[tea.name]?.[field] ?? t(tea[field])) : tea[field]
+  if (language.value !== 'en') return tea[field]
+  const approved = t(tea[field])
+  return approved !== tea[field] ? approved : (teaEnglish[tea.name]?.[field] ?? approved)
 }
 
 const sectionEl = ref(null)

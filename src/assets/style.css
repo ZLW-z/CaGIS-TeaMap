@@ -439,3 +439,5 @@ main#story{display:block;}
 .english-copy .chapter-corner-title-en {
   margin-bottom: 6px;
 }
+#app-root .english-copy .intro-title-row.keep-chinese .intro-char { font-size: 100px; }
+#app-root .english-copy .intro-ch-no.keep-chinese { font-size: 80px; }

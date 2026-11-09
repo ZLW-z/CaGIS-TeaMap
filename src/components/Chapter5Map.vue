@@ -1,9 +1,9 @@
 <template>
-  <section class="chapter chapter-5" :id="id" ref="sectionEl">
+  <section :class="{ 'english-copy': language === 'en' }" :lang="language === 'en' ? 'en' : 'zh-CN'" class="chapter chapter-5" :id="id" ref="sectionEl">
     <ChapterIntro
-      :ch-no="chapter.number"
-      :title="chapter.title"
-      :desc="chapter.description"
+      :ch-no="language === 'en' ? 'V' : chapter.number"
+      :title="translateText(chapter.title)"
+      :desc="translateText(chapter.description)"
       :duration="7"
       @done="onIntroDone"
     />
@@ -43,13 +43,13 @@
                       :fill="activePhonePanel === 'leaves' ? 'rgba(92,124,58,0.95)' : 'rgba(247,244,235,0.92)'" />
                 <text x="14" y="24"
                       :fill="activePhonePanel === 'leaves' ? '#FFF8E8' : '#5C7C3A'"
-                      style="font-size:12.5px;font-weight:500;letter-spacing:0.05em">叶片 · 新生</text>
+                      :style="{ fontSize: language === 'en' ? '11.5px' : '12.5px' }" style="font-weight:500;letter-spacing:0.05em">{{ translateText("叶片 · 新生") }}</text>
                 <text x="14" y="41"
                       :fill="activePhonePanel === 'leaves' ? '#EFE9DA' : '#5A6655'"
-                      style="font-size:9px;font-weight:500;letter-spacing:0.02em">茶叶内销量</text>
+                      :style="{ fontSize: language === 'en' ? '8px' : '9px' }" style="font-weight:500;letter-spacing:0.02em">{{ translateText("茶叶内销量") }}</text>
                 <text x="14" y="60"
                       :fill="activePhonePanel === 'leaves' ? '#FFF8E8' : '#4A4A40'"
-                      style="font-size:17px;font-weight:900;font-family:var(--font-huiwen)">{{ fmt(leavesDomesticLatest.volume, 2) }}万吨</text>
+                      :style="{ fontSize: language === 'en' ? '16px' : '17px' }" style="font-weight:900;font-family:var(--font-huiwen)">{{ treeMetric(fmt(leavesDomesticLatest.volume, 2),"万吨") }}</text>
               </g>
             </g>
 
@@ -69,13 +69,13 @@
                       :fill="activePhonePanel === 'branches' ? 'rgba(107,68,35,0.95)' : 'rgba(247,244,235,0.92)'" />
                 <text x="14" y="24"
                       :fill="activePhonePanel === 'branches' ? '#FFF8E8' : '#6B4423'"
-                      style="font-size:12.5px;font-weight:500;letter-spacing:0.05em">枝条 · 远拓</text>
+                      :style="{ fontSize: language === 'en' ? '11.5px' : '12.5px' }" style="font-weight:500;letter-spacing:0.05em">{{ translateText("枝条 · 远拓") }}</text>
                 <text x="14" y="41"
                       :fill="activePhonePanel === 'branches' ? '#EFE9DA' : '#5A6655'"
-                      style="font-size:9px;font-weight:500;letter-spacing:0.02em">茶叶出口额</text>
+                      :style="{ fontSize: language === 'en' ? '8px' : '9px' }" style="font-weight:500;letter-spacing:0.02em">{{ translateText("茶叶出口额") }}</text>
                 <text x="14" y="60"
                       :fill="activePhonePanel === 'branches' ? '#FFF8E8' : '#4A4A40'"
-                      style="font-size:17px;font-weight:900;font-family:var(--font-huiwen)">{{ fmt(exportTotal / 1e8, 2) }}亿元</text>
+                      :style="{ fontSize: language === 'en' ? '16px' : '17px' }" style="font-weight:900;font-family:var(--font-huiwen)">{{ treeMetric(fmt(exportTotal / 1e8, 2),"亿元") }}</text>
               </g>
             </g>
 
@@ -95,13 +95,13 @@
                       :fill="activePhonePanel === 'roots' ? 'rgba(178,143,76,0.95)' : 'rgba(247,244,235,0.92)'" />
                 <text x="14" y="24"
                       :fill="activePhonePanel === 'roots' ? '#FFF8E8' : '#B28F4C'"
-                      style="font-size:12.5px;font-weight:500;letter-spacing:0.05em">根系 · 深植</text>
+                      :style="{ fontSize: language === 'en' ? '11.5px' : '12.5px' }" style="font-weight:500;letter-spacing:0.05em">{{ translateText("根系 · 深植") }}</text>
                 <text x="14" y="41"
                       :fill="activePhonePanel === 'roots' ? '#EFE9DA' : '#5A6655'"
-                      style="font-size:9px;font-weight:500;letter-spacing:0.02em">全国茶园面积</text>
+                      :style="{ fontSize: language === 'en' ? '8px' : '9px' }" style="font-weight:500;letter-spacing:0.02em">{{ translateText("全国茶园面积") }}</text>
                 <text x="14" y="60"
                       :fill="activePhonePanel === 'roots' ? '#FFF8E8' : '#4A4A40'"
-                      style="font-size:17px;font-weight:900;font-family:var(--font-huiwen)">{{ fmt(gardenArea, 2) }}千公顷</text>
+                      :style="{ fontSize: language === 'en' ? '16px' : '17px' }" style="font-weight:900;font-family:var(--font-huiwen)">{{ treeMetric(fmt(gardenArea, 2),"千公顷") }}</text>
               </g>
             </g>
           </svg>
@@ -118,7 +118,7 @@
           </div>
           <div class="phone-statusbar">
             <span class="sb-time">9:41</span>
-            <span class="sb-title">{{ activePhonePanel === 'roots' ? '根深植' : activePhonePanel === 'leaves' ? '叶新生' : '枝远拓' }}</span>
+            <span class="sb-title">{{ translateText(activePhonePanel === 'roots' ? '根深植' : activePhonePanel === 'leaves' ? '叶新生' : '枝远拓') }}</span>
             <span class="sb-signal">●●●</span>
           </div>
 
@@ -131,9 +131,9 @@
 
               <!-- 1. 标题与导语 -->
               <div class="lv-hero">
-                <div class="lv-hero-kicker">根系·深植</div>
-                <div class="lv-hero-sub">中国茶园资源、生产基础与区域格局</div>
-                <div class="lv-hero-intro">从茶园面积到核心产区，再到重点省份的长期变化，看一片茶叶生长所依托的土地基础与区域分布。</div>
+                <div class="lv-hero-kicker">{{ translateText("根系·深植") }}</div>
+                <div class="lv-hero-sub">{{ translateText("中国茶园资源、生产基础与区域格局") }}</div>
+                <div class="lv-hero-intro">{{ translateText("从茶园面积到核心产区，再到重点省份的长期变化，看一片茶叶生长所依托的土地基础与区域分布。") }}</div>
               </div>
 
               <!-- 顶部小工具条 -->
@@ -145,64 +145,64 @@
                     :class="['toggle-btn', { active: metric === m.key }]"
                     :style="metric === m.key ? { background: m.color, borderColor: m.color, color: '#FFFFFF' } : { color: '#3A3A2E' }"
                     @click="setMetric(m.key)"
-                  >{{ m.label }}</button>
+                  >{{ translateText(m.label) }}</button>
                 </div>
                 <div class="ch5-year-slider small" :style="{ '--ch5-slider-accent': metricColor, '--ch5-slider-fill': rootsYearFillPct }">
                   <input type="range" :min="allProvinceYears[0]" :max="allProvinceYears[allProvinceYears.length - 1]" step="1" v-model.number="rootsYear" class="slider-input" />
-                  <span class="slider-value">{{ rootsYear }}</span>
+                  <span class="slider-value">{{ translateText(rootsYear) }}</span>
                 </div>
               </div>
 
               <!-- 概览 2x2 -->
               <div class="wf-overview-grid">
                 <div class="ch5-overview-card small-card">
-                  <div class="ov-label">茶园面积</div>
-                  <div class="ov-value"><span class="ch5-stat-num">{{ fmt(rootsOverview.gardenArea, 2) }}</span><span class="ov-unit">千公顷</span></div>
+                  <div class="ov-label">{{ translateText("茶园面积") }}</div>
+                  <div class="ov-value"><span class="ch5-stat-num">{{ translateText(fmt(rootsOverview.gardenArea, 2)) }}</span><span class="ov-unit">{{ translateText("千公顷") }}</span></div>
                 </div>
                 <div class="ch5-overview-card small-card">
-                  <div class="ov-label">茶叶产量</div>
-                  <div class="ov-value"><span class="ch5-stat-num">{{ fmt(rootsOverview.totalOutput, 2) }}</span><span class="ov-unit">万吨</span></div>
+                  <div class="ov-label">{{ translateText("茶叶产量") }}</div>
+                  <div class="ov-value"><span class="ch5-stat-num">{{ translateText(fmt(rootsOverview.totalOutput, 2)) }}</span><span class="ov-unit">{{ translateText("万吨") }}</span></div>
                 </div>
                 <div class="ch5-overview-card small-card">
-                  <div class="ov-label">产量同比</div>
+                  <div class="ov-label">{{ translateText("产量同比") }}</div>
                   <div class="ov-value">
                     <span class="ch5-stat-num" :style="{ color: rootsOverview.yoy >= 0 ? '#5C7C3A' : '#A8453A' }">
-                      {{ rootsOverview.yoy !== null ? (rootsOverview.yoy >= 0 ? '+' : '') + rootsOverview.yoy.toFixed(2) + '%' : '—' }}
+                      {{ translateText(rootsOverview.yoy !== null ? (rootsOverview.yoy >= 0 ? '+' : '') + rootsOverview.yoy.toFixed(2) + '%' : '—') }}
                     </span>
                   </div>
                 </div>
                 <div class="ch5-overview-card small-card">
-                  <div class="ov-label">统计省份</div>
-                  <div class="ov-value"><span class="ch5-stat-num">{{ rootsOverview.provinceCount }}</span><span class="ov-unit">个</span></div>
+                  <div class="ov-label">{{ translateText("统计省份") }}</div>
+                  <div class="ov-value"><span class="ch5-stat-num">{{ translateText(rootsOverview.provinceCount) }}</span><span class="ov-unit">{{ translateText("个") }}</span></div>
                 </div>
               </div>
 
               <!-- 地图 -->
               <div class="ch5-card small-card wf-map-card">
-                <div class="card-title-sm">{{ rootsYear }}年中国各省{{ metricLabel }}分布</div>
+                <div class="card-title-sm">{{ translateText([rootsYear,"年中国各省",metricLabel,"分布"].join('')) }}</div>
                 <div class="chart-container chart-map">
-                  <div v-if="!mapReady" class="ch5-map-loading">加载中…</div>
+                  <div v-if="!mapReady" class="ch5-map-loading">{{ translateText("加载中…") }}</div>
                   <EChart v-else :option="rootsMapOption" @ready="onRootsMapReady" @click="onMapClick" style="height:280px" />
                 </div>
-                <div v-if="metric === 'gardenArea'" class="lv-chart-note">图示说明：圆盘大小表示各省茶园面积（千公顷），圆盘越大，茶园面积越大；颜色深浅表示茶园面积占该省行政区划面积的覆盖率（%），颜色越深，覆盖率越高。</div>
-                <div v-else class="lv-chart-note">图示说明：圆盘大小表示各省茶叶产量（万吨），圆盘越大，茶叶产量越高；圆盘颜色表示较上一年的产量增长率，绿色越深表示增长越快，绿色越浅表示增长较慢、产量下降或暂无可比数据。</div>
+                <div v-if="metric === 'gardenArea'" class="lv-chart-note">{{ translateText("图示说明：圆盘大小表示各省茶园面积（千公顷），圆盘越大，茶园面积越大；颜色深浅表示茶园面积占该省行政区划面积的覆盖率（%），颜色越深，覆盖率越高。") }}</div>
+                <div v-else class="lv-chart-note">{{ translateText("图示说明：圆盘大小表示各省茶叶产量（万吨），圆盘越大，茶叶产量越高；圆盘颜色表示较上一年的产量增长率，绿色越深表示增长越快，绿色越浅表示增长较慢、产量下降或暂无可比数据。") }}</div>
               </div>
 
               <!-- 省份详情 -->
               <div class="ch5-card small-card wf-prov-card">
-                <div class="card-title-sm">{{ selectedProvince }}{{ metricLabel }}变化趋势</div>
+                <div class="card-title-sm">{{ translateText([selectedProvince,metricLabel,"变化趋势"].join('')) }}</div>
                 <div v-if="rootsProvinceDetail" class="province-detail-body small">
                   <div class="chart-container chart-province-trend small">
                     <EChart :option="rootsProvinceTrendOption" style="height:200px" />
                   </div>
                 </div>
-                <div v-else class="empty-hint small">点击地图选择省份</div>
+                <div v-else class="empty-hint small">{{ translateText("点击地图选择省份") }}</div>
               </div>
 
               <!-- TOP10 排名 -->
               <div class="ch5-card small-card wf-rank-card">
-                <div class="card-title-sm">{{ rootsYear }}年中国{{ metricLabel }}前十</div>
-                <div class="ch5-chart-unit">单位：{{ metricUnit }}</div>
+                <div class="card-title-sm">{{ translateText([rootsYear,"年中国",metricLabel,"前十"].join('')) }}</div>
+                <div class="ch5-chart-unit">{{ translateText(["单位：",metricUnit].join('')) }}</div>
                 <div class="chart-container chart-ranking small">
                   <EChart :option="rootsRankingOption" style="height:240px" />
                 </div>
@@ -214,30 +214,30 @@
 
               <!-- 1. 标题与导语 -->
               <div class="lv-hero">
-                <div class="lv-hero-kicker">叶片·新生</div>
-                <div class="lv-hero-sub">2010—2024 中国茶消费长期变化与新表达</div>
-                <div class="lv-hero-intro">十五年间，中国茶消费从规模扩张走向量稳、价变与场景分化。沿着总量、价值、渠道与产品形态，观察一片茶叶如何进入新的日常。</div>
+                <div class="lv-hero-kicker">{{ translateText("叶片·新生") }}</div>
+                <div class="lv-hero-sub">{{ translateText("2010—2024 中国茶消费长期变化与新表达") }}</div>
+                <div class="lv-hero-intro">{{ translateText("十五年间，中国茶消费从规模扩张走向量稳、价变与场景分化。沿着总量、价值、渠道与产品形态，观察一片茶叶如何进入新的日常。") }}</div>
               </div>
 
               <!-- 2. 先看结论：3张分析卡 -->
               <div class="lv-conclusion-list">
                 <div v-for="c in leavesConclusions" :key="c.id" class="lv-conclusion-card">
-                  <div class="lv-cc-title">{{ c.title }}</div>
+                  <div class="lv-cc-title">{{ translateText(c.title) }}</div>
                   <!-- 规模扩张卡 -->
                   <template v-if="c.id === 'scale'">
                     <div class="lv-cc-scale-row">
-                      <div class="lv-cc-scale-val"><span class="lv-cc-num">{{ c.startVal.toFixed(2) }}</span><span class="lv-cc-unit">{{ c.unit }}</span></div>
+                      <div class="lv-cc-scale-val"><span class="lv-cc-num">{{ translateText(c.startVal.toFixed(2)) }}</span><span class="lv-cc-unit">{{ translateText(c.unit) }}</span></div>
                       <div class="lv-cc-arrow">→</div>
-                      <div class="lv-cc-scale-val"><span class="lv-cc-num">{{ c.endVal.toFixed(2) }}</span><span class="lv-cc-unit">{{ c.unit }}</span></div>
+                      <div class="lv-cc-scale-val"><span class="lv-cc-num">{{ translateText(c.endVal.toFixed(2)) }}</span><span class="lv-cc-unit">{{ translateText(c.unit) }}</span></div>
                     </div>
-                    <div class="lv-cc-badge">累计增长约 {{ c.growthPct }}%</div>
+                    <div class="lv-cc-badge">{{ translateText(["累计增长约 ",c.growthPct,"%"].join('')) }}</div>
                   </template>
                   <!-- 增速换挡卡 -->
                   <template v-else-if="c.id === 'shift'">
                     <div class="lv-cc-phase-list">
                       <div v-for="(p, i) in c.phases" :key="i" class="lv-cc-phase">
-                        <span class="lv-cc-phase-period">{{ p.period }}</span>
-                        <span class="lv-cc-phase-cagr">{{ p.cagr }}%</span>
+                        <span class="lv-cc-phase-period">{{ translateText(p.period) }}</span>
+                        <span class="lv-cc-phase-cagr">{{ translateText(p.cagr) }}%</span>
                       </div>
                     </div>
                   </template>
@@ -245,40 +245,40 @@
                   <template v-else-if="c.id === 'recent'">
                     <div class="lv-cc-metrics">
                       <div v-for="(m, i) in c.metrics" :key="i" class="lv-cc-metric">
-                        <span class="lv-cc-metric-label">{{ m.label }}</span>
-                        <span class="lv-cc-metric-change" :class="{ neg: m.change.startsWith('-') }">{{ m.change }}</span>
+                        <span class="lv-cc-metric-label">{{ translateText(m.label) }}</span>
+                        <span class="lv-cc-metric-change" :class="{ neg: m.change.startsWith('-') }">{{ translateText(m.change) }}</span>
                       </div>
                     </div>
                   </template>
-                  <div class="lv-cc-desc">{{ c.desc }}</div>
+                  <div class="lv-cc-desc">{{ translateText(c.desc) }}</div>
                 </div>
               </div>
 
               <!-- 3. 图1：内销总量趋势 -->
               <div class="lv-chart-block">
-                <div class="lv-chart-title">茶叶国内销量总量趋势图（2010—2024年）</div>
+                <div class="lv-chart-title">{{ translateText("茶叶国内销量总量趋势图（2010—2024年）") }}</div>
                 <div class="ch5-card small-card">
                   <div class="chart-container" style="height:260px">
                     <EChart :option="leavesVolumeTrendOption" />
                   </div>
                 </div>
-                <div class="lv-chart-note">2010—2024年中国茶叶内销量长期增长，但增长速度逐步放缓。2022—2024年总量接近平台期，市场观察重点开始由单纯扩量转向产品、价格带与消费场景的结构变化。</div>
+                <div class="lv-chart-note">{{ translateText("2010—2024年中国茶叶内销量长期增长，但增长速度逐步放缓。2022—2024年总量接近平台期，市场观察重点开始由单纯扩量转向产品、价格带与消费场景的结构变化。") }}</div>
               </div>
 
               <!-- 4. 内销趋势三阶段结论 -->
               <div class="lv-stages">
-                <div class="lv-stages-title"><span>国内销量增势趋缓，<br>竞争转向结构升级</span></div>
+                <div class="lv-stages-title"><span>{{ translateText("国内销量增势趋缓，") }}<br>{{ translateText("竞争转向结构升级") }}</span></div>
                 <div class="lv-stage-list">
                   <div v-for="(s, i) in leavesStages" :key="s.id" class="lv-stage-card" :style="{ '--stage-color': stageColors[i] }">
-                    <div class="lv-stage-num">{{ i + 1 }}</div>
+                    <div class="lv-stage-num">{{ translateText(i + 1) }}</div>
                     <div class="lv-stage-body">
-                      <div class="lv-stage-period">{{ s.period }}</div>
-                      <div class="lv-stage-name">{{ s.name }}</div>
+                      <div class="lv-stage-period">{{ translateText(s.period) }}</div>
+                      <div class="lv-stage-name">{{ translateText(s.name) }}</div>
                       <div class="lv-stage-metrics">
-                        <span class="lv-stage-metric">期初 {{ s.startVolume.toFixed(2) }} → 期末 {{ s.endVolume.toFixed(2) }} 万吨</span>
-                        <span class="lv-stage-cagr">年均复合增速 {{ s.cagr }}%</span>
+                        <span class="lv-stage-metric">{{ translateText(["期初 ",s.startVolume.toFixed(2)," → 期末 ",s.endVolume.toFixed(2)," 万吨"].join('')) }}</span>
+                        <span class="lv-stage-cagr">{{ translateText(["年均复合增速 ",s.cagr,"%"].join('')) }}</span>
                       </div>
-                      <div class="lv-stage-conclusion">{{ s.conclusion }}</div>
+                      <div class="lv-stage-conclusion">{{ translateText(s.conclusion) }}</div>
                     </div>
                   </div>
                 </div>
@@ -286,19 +286,19 @@
 
               <!-- 5. 图2：内销总额与均价趋势 -->
               <div class="lv-chart-block">
-                <div class="lv-chart-title">茶叶国内销量总额与均价趋势图（2013—2024年）</div>
+                <div class="lv-chart-title">{{ translateText("茶叶国内销量总额与均价趋势图（2013—2024年）") }}</div>
                 <div class="ch5-card small-card">
                   <div class="chart-container" style="height:300px">
                     <EChart :option="leavesValuePriceOption" />
                   </div>
                 </div>
-                <div class="lv-chart-note lv-chart-note-approx">注：2013—2015年金额为公开图表数字化约数，以“≈”或浅色柱标注。</div>
-                <div class="lv-chart-note">内销量保持稳定，但内销总额和平均单价在2022年后回落，说明市场并非简单持续上扬，更适合进一步观察价格带、产品形态和消费场景的重新分配。</div>
+                <div class="lv-chart-note lv-chart-note-approx">{{ translateText("注：2013—2015年金额为公开图表数字化约数，以“≈”或浅色柱标注。") }}</div>
+                <div class="lv-chart-note">{{ translateText("内销量保持稳定，但内销总额和平均单价在2022年后回落，说明市场并非简单持续上扬，更适合进一步观察价格带、产品形态和消费场景的重新分配。") }}</div>
               </div>
 
               <!-- 6. 图3：线上交易规模 -->
               <div class="lv-chart-block">
-                <div class="lv-chart-title">中国茶叶线上交易规模变化图（2016—2024年）</div>
+                <div class="lv-chart-title">{{ translateText("中国茶叶线上交易规模变化图（2016—2024年）") }}</div>
                 <div class="ch5-card small-card">
                   <div class="chart-container" style="height:260px">
                     <EChart :option="leavesOnlineOption" />
@@ -309,7 +309,7 @@
 
               <!-- 7. 一片茶叶的六种新表达（入口卡，点击打开详情弹层） -->
               <div class="lv-products">
-                <div class="lv-products-title">一片茶叶的六种新表达</div>
+                <div class="lv-products-title">{{ translateText("一片茶叶的六种新表达") }}</div>
                 <div class="lv-product-grid">
                   <div
                     v-for="p in leavesProductsSorted"
@@ -318,12 +318,12 @@
                     :class="{ 'is-active': detailProduct === p.order }"
                     @click="openProductDetail(p.order)">
                     <div class="lv-prod-head">
-                      <div class="lv-prod-ord">{{ p.order }}</div>
-                      <div class="lv-prod-type">{{ p.type }}</div>
+                      <div class="lv-prod-ord">{{ translateText(p.order) }}</div>
+                      <div class="lv-prod-type">{{ translateText(p.type) }}</div>
                     </div>
-                    <div class="lv-prod-subtitle">{{ p.subtitle }}</div>
+                    <div class="lv-prod-subtitle">{{ translateText(p.subtitle) }}</div>
                     <div class="lv-prod-repr">
-                      <span v-for="(prod, i) in p.entryProducts" :key="i" class="lv-prod-chip">{{ prod }}</span>
+                      <span v-for="(prod, i) in p.entryProducts" :key="i" class="lv-prod-chip">{{ translateText(prod) }}</span>
                     </div>
                   </div>
                 </div>
@@ -331,63 +331,63 @@
 
               <!-- 8. 总结与数据来源 -->
               <div class="lv-summary">
-                <div class="lv-summary-quote">从盖碗中的一片叶，到街头的一杯茶，再到食品、健康与日化产品，茶正在以新的方式进入当代生活。</div>
-                <div class="lv-source-note">{{ leavesDataSource }}</div>
+                <div class="lv-summary-quote">{{ translateText("从盖碗中的一片叶，到街头的一杯茶，再到食品、健康与日化产品，茶正在以新的方式进入当代生活。") }}</div>
+                <div class="lv-source-note">{{ translateText(leavesDataSource) }}</div>
               </div>
 
               <!-- ==== 六表达详情卡：手机内弹层（不超出手机外壳）==== -->
               <transition name="lv-fade">
                 <div v-if="detailProduct" class="lv-detail-modal" @click.self="closeProductDetail">
                   <div v-if="detailProductData" class="lv-detail-card">
-                    <button class="lv-detail-close" @click="closeProductDetail" type="button" aria-label="关闭">×</button>
+                    <button class="lv-detail-close" @click="closeProductDetail" type="button" :aria-label="translateText(&quot;关闭&quot;)">×</button>
 
                     <!-- 六张统一 3:2 横构图以顶部通栏方式完整显示 -->
                     <div class="lv-detail-media">
                       <img
                         class="lv-detail-image"
                         :src="detailProductData.image"
-                        :alt="detailProductData.imageAlt"
+                        :alt="translateText(detailProductData.imageAlt)"
                       />
                     </div>
 
                     <div class="lv-detail-heading">
-                      <div class="lv-detail-ord">{{ detailProductData.order }}</div>
+                      <div class="lv-detail-ord">{{ translateText(detailProductData.order) }}</div>
                       <div class="lv-detail-title-group">
-                        <div class="lv-detail-type">{{ detailProductData.type }}</div>
-                        <div class="lv-detail-subtitle">{{ detailProductData.subtitle }}</div>
+                        <div class="lv-detail-type">{{ translateText(detailProductData.type) }}</div>
+                        <div class="lv-detail-subtitle">{{ translateText(detailProductData.subtitle) }}</div>
                       </div>
                     </div>
 
                     <div class="lv-detail-body">
                       <!-- 数据、年份和统计范围改写为连贯文字 -->
                       <section class="lv-detail-summary">
-                        <div class="lv-detail-sec-label">数据概览</div>
-                        <p>{{ detailProductData.summary }}</p>
+                        <div class="lv-detail-sec-label">{{ translateText("数据概览") }}</div>
+                        <p>{{ translateText(detailProductData.summary) }}</p>
                       </section>
 
                       <!-- 代表产品 -->
                       <section class="lv-detail-products">
-                        <div class="lv-detail-sec-label">代表产品</div>
+                        <div class="lv-detail-sec-label">{{ translateText("代表产品") }}</div>
                         <div class="lv-detail-product-chips">
-                          <span v-for="(prod, i) in detailProductData.products" :key="i" class="lv-prod-chip">{{ prod }}</span>
+                          <span v-for="(prod, i) in detailProductData.products" :key="i" class="lv-prod-chip">{{ translateText(prod) }}</span>
                         </div>
                       </section>
 
                       <!-- 解读 -->
                       <section class="lv-detail-explain">
-                        <div class="lv-detail-sec-label">解读</div>
-                        <div class="lv-detail-explain-text">{{ detailProductData.explain }}</div>
+                        <div class="lv-detail-sec-label">{{ translateText("解读") }}</div>
+                        <div class="lv-detail-explain-text">{{ translateText(detailProductData.explain) }}</div>
                       </section>
 
                       <!-- 来源 -->
                       <div class="lv-detail-source">
-                        <span class="lv-detail-source-label">资料来源：</span>
+                        <span class="lv-detail-source-label">{{ translateText("资料来源：") }}</span>
                         <a
                           class="lv-detail-source-name"
                           :href="detailProductData.sourceUrl"
                           target="_blank"
                           rel="noopener noreferrer"
-                        >{{ detailProductData.source }}</a>
+                        >{{ translateText(detailProductData.source) }}</a>
                       </div>
                     </div>
                   </div>
@@ -401,50 +401,50 @@
 
               <!-- 1. 标题与导语 -->
               <div class="lv-hero">
-                <div class="lv-hero-kicker">枝条·远拓</div>
-                <div class="lv-hero-sub">中国茶叶出口、市场连接与全球流动</div>
-                <div class="lv-hero-intro">枝条向外延展，连接产地与世界。从出口规模、目的地分布到省—市流动，看中国茶如何走向全球市场。</div>
+                <div class="lv-hero-kicker">{{ translateText("枝条·远拓") }}</div>
+                <div class="lv-hero-sub">{{ translateText("中国茶叶出口、市场连接与全球流动") }}</div>
+                <div class="lv-hero-intro">{{ translateText("枝条向外延展，连接产地与世界。从出口规模、目的地分布到省—市流动，看中国茶如何走向全球市场。") }}</div>
               </div>
 
               <div class="wf-controls wf-ctrl-inline">
                 <div class="ch5-year-slider small" :style="{ '--ch5-slider-accent': '#6B4423', '--ch5-slider-fill': branchesYearFillPct }">
                   <input type="range" :min="branchesYears[0]" :max="branchesYears[branchesYears.length - 1]" step="1" v-model.number="branchesYear" class="slider-input" />
-                  <span class="slider-value">{{ branchesYear }}</span>
+                  <span class="slider-value">{{ translateText(branchesYear) }}</span>
                 </div>
               </div>
 
               <div class="wf-overview-grid">
                 <div class="ch5-overview-card small-card">
-                  <div class="ov-label">出口总额</div>
-                  <div class="ov-value"><span class="ch5-stat-num">{{ fmt(branchesOverview.totalExport / 1e8, 2) }}</span><span class="ov-unit">亿</span></div>
+                  <div class="ov-label">{{ translateText("出口总额") }}</div>
+                  <div class="ov-value"><span class="ch5-stat-num">{{ translateText(fmt(branchesOverview.totalExport / 1e8, 2)) }}</span><span class="ov-unit">{{ translateText("亿") }}</span></div>
                 </div>
                 <div class="ch5-overview-card small-card">
-                  <div class="ov-label">首位目的地</div>
-                  <div class="ov-value"><span class="ch5-stat-num">{{ branchesOverview.topCountry || '—' }}</span></div>
+                  <div class="ov-label">{{ translateText("首位目的地") }}</div>
+                  <div class="ov-value"><span class="ch5-stat-num">{{ translateText(branchesOverview.topCountry || '—') }}</span></div>
                 </div>
                 <div class="ch5-overview-card small-card">
-                  <div class="ov-label">目的地总数</div>
-                  <div class="ov-value"><span class="ch5-stat-num">{{ branchesOverview.countryCount }}</span><span class="ov-unit">国</span></div>
+                  <div class="ov-label">{{ translateText("目的地总数") }}</div>
+                  <div class="ov-value"><span class="ch5-stat-num">{{ translateText(branchesOverview.countryCount) }}</span><span class="ov-unit">{{ translateText("国") }}</span></div>
                 </div>
                 <div class="ch5-overview-card small-card">
-                  <div class="ov-label">出口省份数量</div>
-                  <div class="ov-value"><span class="ch5-stat-num">{{ branchesOverview.provinceCount }}</span><span class="ov-unit">省</span></div>
+                  <div class="ov-label">{{ translateText("出口省份数量") }}</div>
+                  <div class="ov-value"><span class="ch5-stat-num">{{ translateText(branchesOverview.provinceCount) }}</span><span class="ov-unit">{{ translateText("省") }}</span></div>
                 </div>
               </div>
 
               <!-- 桑基图 -->
               <div class="ch5-card small-card wf-sankey-card">
-                <div class="card-title-sm">{{ branchesYear }}年中国茶叶出口省至目的地流向图</div>
+                <div class="card-title-sm">{{ translateText([branchesYear,"年中国茶叶出口省至目的地流向图"].join('')) }}</div>
                 <div class="chart-container chart-sankey small">
                   <EChart :option="branchesSankeyOption" style="height:320px" />
                 </div>
-                <div class="lv-chart-note">图示说明：左侧为出口省份，右侧为出口目的地；连线方向代表出口流向；连线越粗、节点越高，对应出口额（亿元）越大。</div>
+                <div class="lv-chart-note">{{ translateText("图示说明：左侧为出口省份，右侧为出口目的地；连线方向代表出口流向；连线越粗、节点越高，对应出口额（亿元）越大。") }}</div>
               </div>
 
               <!-- TOP 10 目的地 -->
               <div class="ch5-card small-card">
-                <div class="card-title-sm">{{ branchesYear }}年中国茶叶十大出口目的地</div>
-                <div class="ch5-chart-unit">单位：亿元</div>
+                <div class="card-title-sm">{{ translateText([branchesYear,"年中国茶叶十大出口目的地"].join('')) }}</div>
+                <div class="ch5-chart-unit">{{ translateText("单位：亿元") }}</div>
                 <div class="chart-container chart-country-rank small">
                   <EChart :option="branchesCountryRankOption" style="height:240px" />
                 </div>
@@ -452,7 +452,7 @@
 
               <!-- 出口趋势 -->
               <div class="ch5-card small-card">
-                <div class="card-title-sm">中国茶叶出口总额趋势（{{ branchesYears[0] }}—{{ branchesYears[branchesYears.length - 2] ?? branchesYears[branchesYears.length - 1] }}年）</div>
+                <div class="card-title-sm">{{ translateText(["中国茶叶出口总额趋势（",branchesYears[0],"—",branchesYears[branchesYears.length - 2] ?? branchesYears[branchesYears.length - 1],"年）"].join('')) }}</div>
                 <div class="chart-container chart-branch-trend small">
                   <EChart :option="branchesTrendOption" style="height:240px" />
                 </div>
@@ -471,6 +471,11 @@
 </template>
 
 <script setup>
+import { useLanguage } from '../utils/language.js'
+const { language, t: translateText } = useLanguage()
+function treeMetric(value, unit) {
+  return translateText(value + unit).replace('CNY 100 million', 'CNY 100m').replace('1,000 hectares', '1,000 ha').replace('10,000 tonnes', '10,000 t')
+}
 import { ref, computed, onMounted } from 'vue'
 import EChart from './EChart.vue'
 import ChapterIntro from './ChapterIntro.vue'
@@ -3078,4 +3083,56 @@ onMounted(async () => {
     margin: 0 auto;
   }
 }
+
+/* English sizes follow the corresponding Chinese sizes, minus 1px. */
+.english-copy .phone-statusbar {font-size:calc(13px - 1px);}
+.english-copy .sb-signal {font-size:calc(10px - 1px);}
+.english-copy .ch5-metric-toggle.small .toggle-btn {font-size:calc(11px - 1px);}
+.english-copy .ch5-year-slider.small .slider-value {font-size:calc(13px - 1px);}
+.english-copy .ch5-year-select.small .select-input {font-size:calc(12px - 1px);}
+.english-copy .ch5-overview-card.small-card .ov-label {font-size:calc(11px - 1px);}
+.english-copy .panel-branches .ch5-overview-card.small-card .ov-label {font-size:calc(13px - 1px);}
+.english-copy .ch5-overview-card.small-card .ov-unit {font-size:calc(10px - 1px);}
+.english-copy .ch5-overview-card.small-card .ch5-stat-num {font-size:calc(1.25rem - 1px);}
+.english-copy .empty-hint.small {font-size:calc(12px - 1px);}
+.english-copy .province-mini-stats.small .mini-label {font-size:calc(10px - 1px);}
+.english-copy .province-mini-stats.small .mini-val {font-size:calc(12px - 1px);}
+.english-copy .province-mini-stats.small .mini-val small {font-size:calc(9px - 1px);}
+.english-copy .ch5-tea-card.small .tea-card-icon {font-size:calc(16px - 1px);}
+.english-copy .ch5-tea-card.small .tea-card-name {font-size:calc(13px - 1px);}
+.english-copy .ch5-tea-card.small .tea-card-en {font-size:calc(10px - 1px);}
+.english-copy .ch5-tea-card.small .tea-card-desc {font-size:calc(11px - 1px);}
+.english-copy .ch5-tea-card.small .val-num {font-size:calc(14px - 1px);}
+.english-copy .ch5-tea-card.small .val-unit {font-size:calc(10px - 1px);}
+.english-copy .ch5-province-shares.small-wrap .shares-title {font-size:calc(13px - 1px);}
+.english-copy .ch5-share-card.small .share-rank {font-size:calc(11px - 1px);}
+.english-copy .ch5-share-card.small .share-name {font-size:calc(12px - 1px);}
+.english-copy .ch5-share-card.small .share-val {font-size:calc(10px - 1px);}
+.english-copy .lv-hero-sub {font-size:calc(11px - 1px);}
+.english-copy .lv-hero-intro {font-size:calc(12px - 1px);}
+.english-copy .lv-cc-unit {font-size:calc(10px - 1px);}
+.english-copy .lv-cc-arrow {font-size:calc(18px - 1px);}
+.english-copy .lv-cc-badge {font-size:calc(10px - 1px);}
+.english-copy .lv-cc-phase-period {font-size:calc(10px - 1px);}
+.english-copy .lv-cc-metric-label {font-size:calc(9px - 1px);}
+.english-copy .lv-cc-desc {font-size:calc(10.5px - 1px);}
+.english-copy .ch5-chart-unit {font-size:calc(10.5px - 1px);}
+.english-copy .lv-chart-note {font-size:calc(10.5px - 1px);}
+.english-copy .lv-chart-note-approx {font-size:calc(10px - 1px);}
+.english-copy .lv-stage-period {font-size:calc(11px - 1px);}
+.english-copy .lv-stage-metric {font-size:calc(11px - 1px);}
+.english-copy .lv-stage-cagr {font-size:calc(11px - 1px);}
+.english-copy .lv-stage-conclusion {font-size:calc(11px - 1px);}
+.english-copy .lv-prod-subtitle {font-size:calc(10px - 1px);}
+.english-copy .lv-prod-chip {font-size:calc(9.5px - 1px);}
+.english-copy .lv-prod-more-label,.english-copy .lv-prod-explain-label,.english-copy .lv-prod-dims-label {font-size:calc(9px - 1px);}
+.english-copy .lv-prod-explain-text {font-size:calc(10px - 1px);}
+.english-copy .lv-prod-dims-text {font-size:calc(9.5px - 1px);}
+.english-copy .lv-detail-close {font-size:calc(16px - 1px);}
+.english-copy .lv-detail-subtitle {font-size:calc(11.5px - 1px);}
+.english-copy .lv-detail-sec-label {font-size:calc(9.5px - 1px);}
+.english-copy .lv-detail-summary p {font-size:calc(11.5px - 1px);}
+.english-copy .lv-detail-explain-text {font-size:calc(11px - 1px);}
+.english-copy .lv-detail-source {font-size:calc(9.5px - 1px);}
+.english-copy .lv-source-note {font-size:calc(9.5px - 1px);}
 </style>

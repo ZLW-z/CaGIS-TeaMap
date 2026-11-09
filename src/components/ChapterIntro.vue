@@ -3,8 +3,8 @@
     <div v-if="visible" class="chapter-intro" ref="introRef">
       <div class="intro-overlay" ref="overlayRef"></div>
       <div class="intro-content">
-        <div class="intro-ch-no" ref="chNoRef">{{ chNo }}</div>
-        <div class="intro-title-row" ref="titleRowRef">
+        <div class="intro-ch-no" :class="{ 'keep-chinese': /[\u4e00-\u9fff]/.test(chNo) }" ref="chNoRef">{{ chNo }}</div>
+        <div class="intro-title-row" :class="{ 'keep-chinese': /[\u4e00-\u9fff]/.test(title) }" ref="titleRowRef">
           <span
             v-for="(ch, i) in titleChars"
             :key="i"

@@ -1,9 +1,9 @@
 <template>
-  <section class="chapter chapter-6" :id="id">
+  <section :class="{ 'english-copy': language === 'en' }" :lang="language === 'en' ? 'en' : 'zh-CN'" class="chapter chapter-6" :id="id">
     <ChapterIntro
-      :ch-no="chapter.number"
-      :title="chapter.title"
-      :desc="chapter.description"
+      :ch-no="language === 'en' ? 'VI' : chapter.number"
+      :title="translateText(chapter.title)"
+      :desc="translateText(chapter.description)"
       :duration="7"
       @done="onIntroDone"
     />
@@ -22,10 +22,10 @@
         </div>
         <div class="globe-tooltip" ref="tooltipEl" hidden></div>
         <ul class="globe-legend">
-          <li><span class="dot origin"></span>茶之原产地</li>
-          <li><span class="dot importer"></span>主要进口国</li>
+          <li><span class="dot origin"></span>{{ translateText("茶之原产地") }}</li>
+          <li><span class="dot importer"></span>{{ translateText("主要进口国") }}</li>
         </ul>
-        <div class="globe-hint">拖拽旋转 · 悬停查看</div>
+        <div class="globe-hint">{{ translateText("拖拽旋转 · 悬停查看") }}</div>
       </div>
 
       <!-- 信息卡 -->
@@ -38,26 +38,25 @@
           <div v-if="selectedPoint" class="card-close" @click="selectedPoint = null">×</div>
           <div class="card-body">
             <div class="card-header">
-              <span class="card-country">{{ (selectedPoint || hoveredPoint).country }}</span>
-              <span v-if="(selectedPoint || hoveredPoint).importRate" class="card-import">
-                中国茶进口占比 {{ (selectedPoint || hoveredPoint).importRate }}
+              <span class="card-country">{{ translateText((selectedPoint || hoveredPoint).country) }}</span>
+              <span v-if="(selectedPoint || hoveredPoint).importRate" class="card-import">{{ translateText([" 中国茶进口占比 ",(selectedPoint || hoveredPoint).importRate].join('')) }}
               </span>
             </div>
-            <h3 class="card-title">{{ (selectedPoint || hoveredPoint).title }}</h3>
+            <h3 class="card-title">{{ translateText((selectedPoint || hoveredPoint).title) }}</h3>
             <div class="card-tags">
-              <span class="tag">{{ (selectedPoint || hoveredPoint).drinkStyle }}</span>
-              <span class="tag type">{{ (selectedPoint || hoveredPoint).teaType }}</span>
+              <span class="tag">{{ translateText((selectedPoint || hoveredPoint).drinkStyle) }}</span>
+              <span class="tag type">{{ translateText((selectedPoint || hoveredPoint).teaType) }}</span>
             </div>
-            <p class="card-intro">{{ (selectedPoint || hoveredPoint).intro }}</p>
+            <p class="card-intro">{{ translateText((selectedPoint || hoveredPoint).intro) }}</p>
             <div class="card-image-bottom">
               <img
                 v-if="(selectedPoint || hoveredPoint).image"
                 :src="(selectedPoint || hoveredPoint).image"
-                :alt="(selectedPoint || hoveredPoint).country"
+                :alt="translateText((selectedPoint || hoveredPoint).country)"
                 @error="onImgErrorBottom"
               />
               <div v-else class="card-image-fallback-bottom">
-                <span class="fallback-text">{{ (selectedPoint || hoveredPoint).country }}</span>
+                <span class="fallback-text">{{ translateText((selectedPoint || hoveredPoint).country) }}</span>
               </div>
             </div>
             <p v-if="!selectedPoint && hoveredPoint" class="card-hint"></p>
@@ -69,6 +68,8 @@
 </template>
 
 <script setup>
+import { useLanguage } from '../utils/language.js'
+const { language, t: translateText } = useLanguage()
 import { ref, reactive, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import * as d3 from 'd3'
 import { feature } from 'topojson-client'
@@ -922,4 +923,13 @@ onBeforeUnmount(() => {
     transform: none;
   }
 }
+
+/* English sizes follow the corresponding Chinese sizes, minus 1px. */
+.english-copy .globe-tooltip {font-size:calc(0.78rem - 1px);}
+.english-copy .card-close {font-size:calc(18px - 1px);}
+.english-copy .info-card.pinned .card-country {font-size:calc(1.38rem - 1px);}
+.english-copy .info-card.pinned .card-import {font-size:calc(0.82rem - 1px);}
+.english-copy .info-card.pinned .card-title {font-size:calc(1.22rem - 1px);}
+.english-copy .info-card.pinned .tag {font-size:calc(0.8rem - 1px);}
+.english-copy .info-card.pinned .card-intro {font-size:calc(0.98rem - 1px);}
 </style>

@@ -1,9 +1,9 @@
 <template>
-  <section class="chapter chapter-4" :id="id" ref="sectionEl">
+  <section :class="{ 'english-copy': language === 'en' }" :lang="language === 'en' ? 'en' : 'zh-CN'" class="chapter chapter-4" :id="id" ref="sectionEl">
     <ChapterIntro
-      :ch-no="chapter.number"
-      :title="chapter.title"
-      :desc="chapter.description"
+      :ch-no="language === 'en' ? 'IV' : chapter.number"
+      :title="translateText(chapter.title)"
+      :desc="translateText(chapter.description)"
       :duration="7"
       @done="onIntroDone"
     />
@@ -18,8 +18,8 @@
           :class="['ch4-tab', { active: ch4Tab === t.key }]"
           @click="switchCh4Tab(t.key)"
         >
-          <span class="tab-icon">{{ t.icon }}</span>
-          <span class="tab-label">{{ t.label }}</span>
+          <span class="tab-icon">{{ translateText(t.icon) }}</span>
+          <span class="tab-label">{{ translateText(t.label) }}</span>
         </button>
       </nav>
 
@@ -29,13 +29,13 @@
           <!-- Loading State -->
           <div v-if="ancientLoading" class="map-loading">
             <div class="loading-spinner"></div>
-            <div class="loading-text">地图载入中...</div>
+            <div class="loading-text">{{ translateText("地图载入中...") }}</div>
           </div>
           <div v-else-if="ancientError" class="map-error">
             <div class="error-icon">⚠️</div>
-            <div class="error-text">地图加载失败</div>
-            <div class="error-hint">{{ ancientError }}</div>
-            <button class="reload-btn" @click="reloadMap">重新加载</button>
+            <div class="error-text">{{ translateText("地图加载失败") }}</div>
+            <div class="error-hint">{{ translateText(ancientError) }}</div>
+            <button class="reload-btn" @click="reloadMap">{{ translateText("重新加载") }}</button>
           </div>
 
           <!-- Main Map Stage -->
@@ -44,30 +44,30 @@
 
             <!-- Legend -->
             <div class="map-legend">
-              <div class="legend-title">图例</div>
+              <div class="legend-title">{{ translateText("图例") }}</div>
               <div class="legend-row">
                 <span class="legend-line land"></span>
-                <span>陆路</span>
+                <span>{{ translateText("陆路") }}</span>
               </div>
               <div class="legend-row">
                 <span class="legend-line sea"></span>
-                <span>海路</span>
+                <span>{{ translateText("海路") }}</span>
               </div>
               <div class="legend-row">
                 <span class="legend-line digitized"></span>
-                <span>当前路线</span>
+                <span>{{ translateText("当前路线") }}</span>
               </div>
               <div class="legend-row">
                 <span class="legend-line inferred"></span>
-                <span>历史路线</span>
+                <span>{{ translateText("历史路线") }}</span>
               </div>
               <div class="legend-row nodes">
                 <span class="legend-node origin"></span>
-                <span>起点</span>
+                <span>{{ translateText("起点") }}</span>
               </div>
               <div class="legend-row nodes">
                 <span class="legend-node destination"></span>
-                <span>终点</span>
+                <span>{{ translateText("终点") }}</span>
               </div>
             </div>
 
@@ -77,25 +77,25 @@
                 <template v-if="panelMode === 'dynasty'">
                   <div class="panel-header">
                     <div class="panel-badges">
-                      <span class="panel-type-tag dynasty">朝代背景</span>
-                      <span class="panel-dynasty-tag">{{ dynastyName }}</span>
+                      <span class="panel-type-tag dynasty">{{ translateText("朝代背景") }}</span>
+                      <span class="panel-dynasty-tag">{{ translateText(dynastyName) }}</span>
                     </div>
                   </div>
                   <div class="panel-title-row">
-                    <h3 class="panel-title">{{ currentDynastyInfo.title }}</h3>
+                    <h3 class="panel-title">{{ translateText(currentDynastyInfo.title) }}</h3>
                   </div>
                   <div class="panel-scroll">
                     <div class="panel-section">
-                      <div class="section-label">阶段特征</div>
-                      <p class="section-text">{{ currentDynastyInfo.feature }}</p>
+                      <div class="section-label">{{ translateText("阶段特征") }}</div>
+                      <p class="section-text">{{ translateText(currentDynastyInfo.feature) }}</p>
                     </div>
                     <div class="panel-section">
-                      <div class="section-label">主要通道</div>
-                      <p class="section-text">{{ currentDynastyInfo.channels }}</p>
+                      <div class="section-label">{{ translateText("主要通道") }}</div>
+                      <p class="section-text">{{ translateText(currentDynastyInfo.channels) }}</p>
                     </div>
                     <div class="panel-section">
-                      <div class="section-label">贸易影响</div>
-                      <p class="section-text">{{ currentDynastyInfo.impact }}</p>
+                      <div class="section-label">{{ translateText("贸易影响") }}</div>
+                      <p class="section-text">{{ translateText(currentDynastyInfo.impact) }}</p>
                     </div>
                   </div>
                 </template>
@@ -103,14 +103,14 @@
                 <template v-else-if="nodeRouteOptions.length && !selectedRoute">
                   <div class="panel-header">
                     <div class="panel-badges">
-                      <span class="panel-type-tag dynasty">路线节点</span>
-                      <span class="panel-dynasty-tag">{{ dynastyName }}</span>
+                      <span class="panel-type-tag dynasty">{{ translateText("路线节点") }}</span>
+                      <span class="panel-dynasty-tag">{{ translateText(dynastyName) }}</span>
                     </div>
-                    <button class="panel-back" @click="showDynastyPanel">返回朝代背景</button>
+                    <button class="panel-back" @click="showDynastyPanel">{{ translateText("返回朝代背景") }}</button>
                   </div>
                   <div class="panel-title-row">
-                    <h3 class="panel-title">{{ selectedNodeName }}</h3>
-                    <p class="panel-subtitle">该节点关联 {{ nodeRouteOptions.length }} 条路线，请选择查看详情。</p>
+                    <h3 class="panel-title">{{ translateText(selectedNodeName) }}</h3>
+                    <p class="panel-subtitle">{{ translateText(["该节点关联 ",nodeRouteOptions.length," 条路线，请选择查看详情。"].join('')) }}</p>
                   </div>
                   <div class="panel-scroll node-route-list">
                     <button
@@ -119,8 +119,8 @@
                       class="node-route-option"
                       @click="selectRoute(route)"
                     >
-                      <span class="node-route-kind">{{ route.routeType }} · {{ route.dynasty }}</span>
-                      <strong>{{ route.origin }} → {{ route.destination }}</strong>
+                      <span class="node-route-kind">{{ translateText(route.routeType) }} · {{ translateText(route.dynasty) }}</span>
+                      <strong>{{ translateText(route.origin) }} → {{ translateText(route.destination) }}</strong>
                     </button>
                   </div>
                 </template>
@@ -128,41 +128,41 @@
                 <template v-else-if="selectedRoute">
                   <div class="panel-header">
                     <div class="panel-badges">
-                      <span class="panel-type-tag" :class="kind(selectedRoute)">{{ selectedRoute.routeType }}</span>
-                      <span class="panel-dynasty-tag">{{ selectedRoute.dynasty }}</span>
-                      <span class="panel-dynasty-tag">{{ routeModeLabel }}</span>
+                      <span class="panel-type-tag" :class="kind(selectedRoute)">{{ translateText(selectedRoute.routeType) }}</span>
+                      <span class="panel-dynasty-tag">{{ translateText(selectedRoute.dynasty) }}</span>
+                      <span class="panel-dynasty-tag">{{ translateText(routeModeLabel) }}</span>
                     </div>
-                    <button class="panel-back" @click="showDynastyPanel">返回朝代背景</button>
+                    <button class="panel-back" @click="showDynastyPanel">{{ translateText("返回朝代背景") }}</button>
                   </div>
                   <div class="panel-title-row">
-                    <h3 class="panel-title">{{ routeFromTo }}</h3>
+                    <h3 class="panel-title">{{ translateText(routeFromTo) }}</h3>
                   </div>
                   <div class="panel-scroll">
                     <div class="panel-info-grid">
                       <div class="info-item">
-                        <span class="info-label">时间</span>
-                        <span class="info-value">{{ routeDisplayTime }}</span>
+                        <span class="info-label">{{ translateText("时间") }}</span>
+                        <span class="info-value">{{ translateText(routeDisplayTime) }}</span>
                       </div>
                       <div class="info-item">
-                        <span class="info-label">流向</span>
-                        <span class="info-value">{{ selectedRoute.routeType === '海路' ? '海上航线' : selectedRoute.routeType === '水陆联运' ? '水陆联运' : '陆路商道' }}</span>
+                        <span class="info-label">{{ translateText("流向") }}</span>
+                        <span class="info-value">{{ translateText(selectedRoute.routeType === '海路' ? '海上航线' : selectedRoute.routeType === '水陆联运' ? '水陆联运' : '陆路商道') }}</span>
                       </div>
                       <div class="info-item info-item-wide">
-                        <span class="info-label">途经节点</span>
-                        <span class="info-value">{{ routeViaText }}</span>
+                        <span class="info-label">{{ translateText("途经节点") }}</span>
+                        <span class="info-value">{{ translateText(routeViaText) }}</span>
                       </div>
                     </div>
                     <div class="panel-section">
-                      <div class="section-label">历史背景</div>
-                      <p class="section-text">{{ selectedRoute.historicalBackground }}</p>
+                      <div class="section-label">{{ translateText("历史背景") }}</div>
+                      <p class="section-text">{{ translateText(selectedRoute.historicalBackground) }}</p>
                     </div>
                     <div class="panel-section">
-                      <div class="section-label">路线故事</div>
-                      <p class="section-text">{{ selectedRoute.routeStory }}</p>
+                      <div class="section-label">{{ translateText("路线故事") }}</div>
+                      <p class="section-text">{{ translateText(selectedRoute.routeStory) }}</p>
                     </div>
                     <div class="panel-section">
-                      <div class="section-label">贸易影响</div>
-                      <p class="section-text">{{ selectedRoute.tradeSignificance }}</p>
+                      <div class="section-label">{{ translateText("贸易影响") }}</div>
+                      <p class="section-text">{{ translateText(selectedRoute.tradeSignificance) }}</p>
                     </div>
                   </div>
                 </template>
@@ -172,10 +172,10 @@
             <!-- Floating Timeline (在地图容器内部，半悬浮) -->
             <div class="timeline-floating">
               <div class="timeline-header">
-                <span class="current-dynasty-label">{{ dynastyName }}</span>
+                <span class="current-dynasty-label">{{ translateText(dynastyName) }}</span>
                 <div class="timeline-controls">
-                  <button class="play-btn" :class="{ playing: isPlaying }" @click="togglePlay">{{ isPlaying ? '暂停' : '播放' }}</button>
-                  <button class="reset-btn" @click="resetView">重置</button>
+                  <button class="play-btn" :class="{ playing: isPlaying }" @click="togglePlay">{{ translateText(isPlaying ? '暂停' : '播放') }}</button>
+                  <button class="reset-btn" @click="resetView">{{ translateText("重置") }}</button>
                 </div>
               </div>
               <div class="timeline-body">
@@ -191,23 +191,23 @@
                     class="dynasty-tick"
                     :class="{ active: dynastyName === tick.name, alternate: tick.index % 2 === 1 }"
                     :style="{ left: (tick.progress * 100) + '%' }"
-                    :aria-label="tick.name"
+                    :aria-label="translateText(tick.name)"
                     @mousedown.stop
                     @click="jumpToDynasty(tick)"
                   >
-                    <span class="tick-label">{{ tick.name }}</span>
+                    <span class="tick-label">{{ translateText(tick.name) }}</span>
                     <span class="tick-mark"></span>
                   </button>
                 </div>
               </div>
-              <div class="route-filter-control" aria-label="路线类型筛选">
+              <div class="route-filter-control" :aria-label="translateText(&quot;路线类型筛选&quot;)">
                 <button
                   v-for="option in routeFilterOptions"
                   :key="option.value"
                   :class="['route-filter-btn', { active: routeFilter === option.value }]"
                   :aria-pressed="routeFilter === option.value"
                   @click.stop="setRouteFilter(option.value)"
-                >{{ option.label }}</button>
+                >{{ translateText(option.label) }}</button>
               </div>
             </div>
           </div>
@@ -221,16 +221,16 @@
 
           <div class="modern-topbar" :class="{ 'is-detail-mode': !isModernChinaMode }">
             <div v-if="!isModernChinaMode" class="modern-title">
-              <span class="title-badge world">{{ selectedModernProvince || '中国' }}</span>
-              <span class="title-sub" v-if="modernProvinceInfo.hasData && modernProvinceInfo.flows.length">{{ modernYear }}年 出口总额 <b class="hl-num">{{ fmtNum(modernProvinceInfo.provinceValue / 1e8) }}</b> 亿元，覆盖 <b class="hl-num">{{ modernProvinceInfo.flows.length }}</b> 个主要国家</span>
-              <span class="title-sub" v-else-if="modernProvinceInfo.hasData">{{ modernYear }}年 出口总额 <b class="hl-num">{{ fmtNum(modernProvinceInfo.provinceValue / 1e8) }}</b> 亿元，暂无主要出口目的地数据</span>
-              <span class="title-sub" v-else>{{ modernYear }}年该省暂无茶叶出口数据</span>
+              <span class="title-badge world">{{ translateText(selectedModernProvince || '中国') }}</span>
+              <span class="title-sub" v-if="modernProvinceInfo.hasData && modernProvinceInfo.flows.length">{{ translateText(modernYear) }}{{ translateText("年 出口总额 ") }}<b class="hl-num">{{ translateText(fmtNum(modernProvinceInfo.provinceValue / 1e8)) }}</b>{{ translateText(" 亿元，覆盖 ") }}<b class="hl-num">{{ translateText(modernProvinceInfo.flows.length) }}</b>{{ translateText(" 个主要国家") }}</span>
+              <span class="title-sub" v-else-if="modernProvinceInfo.hasData">{{ translateText(modernYear) }}{{ translateText("年 出口总额 ") }}<b class="hl-num">{{ translateText(fmtNum(modernProvinceInfo.provinceValue / 1e8)) }}</b>{{ translateText(" 亿元，暂无主要出口目的地数据") }}</span>
+              <span class="title-sub" v-else>{{ translateText([modernYear,"年该省暂无茶叶出口数据"].join('')) }}</span>
             </div>
             <div class="modern-controls">
               <div class="year-select">
-                <span class="slider-label">出口年份</span>
+                <span class="slider-label">{{ translateText("出口年份") }}</span>
                 <select v-model.number="modernYear" @change="onModernYearChange" class="select-input">
-                  <option v-for="y in modernYears" :key="y" :value="y">{{ y }}</option>
+                  <option v-for="y in modernYears" :key="y" :value="y">{{ translateText(y) }}</option>
                 </select>
               </div>
             </div>
@@ -239,7 +239,7 @@
           <!-- 茶叶形比例符号图例：概览与世界详情共用同一固定尺度 -->
           <div class="map-legend modern-legend">
             <div class="modern-legend-section">
-              <div class="modern-legend-title" style="font-family:var(--font-body),KaiTi,STKaiti,serif !important;font-style:normal !important">茶叶符号大小：出口额（亿元）</div>
+              <div class="modern-legend-title" style="font-family:var(--font-body),KaiTi,STKaiti,serif !important;font-style:normal !important">{{ translateText("茶叶符号大小：出口额（亿元）") }}</div>
               <div class="leaf-size-legend">
                 <div v-for="item in leafSizeLegendItems" :key="item.ratio" class="leaf-size-item">
                   <span
@@ -247,35 +247,33 @@
                     :style="{ width: item.displaySize + 'px', height: item.displaySize + 'px' }"
                     v-html="createLeafSvg('#7F985D', false, 1)"
                   ></span>
-                  <span>{{ fmtNum(item.valueYi) }}</span>
+                  <span>{{ translateText(fmtNum(item.valueYi)) }}</span>
                 </div>
               </div>
             </div>
             <div class="modern-legend-section color-section">
-              <div class="modern-legend-title" style="font-family:var(--font-body),KaiTi,STKaiti,serif !important;font-style:normal !important">茶叶颜色：出口额同比增速</div>
+              <div class="modern-legend-title" style="font-family:var(--font-body),KaiTi,STKaiti,serif !important;font-style:normal !important">{{ translateText("茶叶颜色：出口额同比增速") }}</div>
               <div class="leaf-color-legend">
                 <div v-for="item in leafColorLegendItems" :key="item.label" class="leaf-color-item">
                   <span class="legend-leaf color-leaf" v-html="createLeafSvg(item.color, false, 1)"></span>
-                  <span>{{ item.label }}</span>
+                  <span>{{ translateText(item.label) }}</span>
                 </div>
               </div>
             </div>
-            <div v-if="isModernChinaMode" class="modern-legend-guide">
-              点击任意省份，查看该省茶叶出口全球流向
-            </div>
+            <div v-if="isModernChinaMode" class="modern-legend-guide">{{ translateText(" 点击任意省份，查看该省茶叶出口全球流向 ") }}</div>
           </div>
 
           <!-- 悬浮信息卡 -->
           <transition name="panel-fade">
             <div v-if="isModernChinaMode && hoveredProvince" class="hover-card">
-              <div class="hc-title">{{ hoveredProvince.name }}</div>
+              <div class="hc-title">{{ translateText(hoveredProvince.name) }}</div>
               <template v-if="hoveredProvince.hasData">
-                <div class="hc-row"><span>出口额</span><b>{{ fmtNum(hoveredProvince.valueYi) }} 亿元</b></div>
-                <div class="hc-row"><span>全国占比</span><b>{{ fmtNum(hoveredProvince.share) }}%</b></div>
-                <div class="hc-row"><span>同比增速</span><b>{{ formatYoY(hoveredProvince.yoy) }}</b></div>
-                <div class="hc-row market-row"><span>主要出口市场</span><b>{{ hoveredProvince.markets }}</b></div>
+                <div class="hc-row"><span>{{ translateText("出口额") }}</span><b>{{ translateText([fmtNum(hoveredProvince.valueYi)," 亿元"].join('')) }}</b></div>
+                <div class="hc-row"><span>{{ translateText("全国占比") }}</span><b>{{ translateText(fmtNum(hoveredProvince.share)) }}%</b></div>
+                <div class="hc-row"><span>{{ translateText("同比增速") }}</span><b>{{ translateText(formatYoY(hoveredProvince.yoy)) }}</b></div>
+                <div class="hc-row market-row"><span>{{ translateText("主要出口市场") }}</span><b>{{ translateText(hoveredProvince.markets) }}</b></div>
               </template>
-              <div v-else class="hc-empty">该年份暂无数据</div>
+              <div v-else class="hc-empty">{{ translateText("该年份暂无数据") }}</div>
             </div>
           </transition>
 
@@ -284,14 +282,14 @@
             <div v-if="!isModernChinaMode" class="modern-country-panel">
               <div class="panel-header">
                 <div class="panel-title-wrap">
-                  <span class="panel-type-tag modern-tag">全球流向</span>
-                  <h3 class="panel-title">{{ selectedModernProvince }} · 主要出口目的地</h3>
+                  <span class="panel-type-tag modern-tag">{{ translateText("全球流向") }}</span>
+                  <h3 class="panel-title">{{ translateText([selectedModernProvince," · 主要出口目的地"].join('')) }}</h3>
                 </div>
               </div>
               <div v-if="modernProvinceInfo.hasData" class="province-trade-summary">
-                <div><span>出口额</span><b>{{ fmtNum(modernProvinceInfo.provinceValue / 1e8) }}亿元</b></div>
-                <div><span>全国占比</span><b>{{ fmtNum(modernProvinceInfo.share) }}%</b></div>
-                <div><span>同比增速</span><b>{{ formatYoY(modernProvinceInfo.yoy) }}</b></div>
+                <div><span>{{ translateText("出口额") }}</span><b>{{ translateText([fmtNum(modernProvinceInfo.provinceValue / 1e8),"亿元"].join('')) }}</b></div>
+                <div><span>{{ translateText("全国占比") }}</span><b>{{ translateText(fmtNum(modernProvinceInfo.share)) }}%</b></div>
+                <div><span>{{ translateText("同比增速") }}</span><b>{{ translateText(formatYoY(modernProvinceInfo.yoy)) }}</b></div>
               </div>
               <div v-if="modernProvinceInfo.flows.length" class="panel-scroll">
                 <div
@@ -302,14 +300,14 @@
                   @mouseenter="highlightFlowCountry(f.country, true)"
                   @mouseleave="highlightFlowCountry(f.country, false)"
                 >
-                  <div class="cr-rank">{{ i + 1 }}</div>
-                  <div class="cr-name">{{ f.country }}</div>
+                  <div class="cr-rank">{{ translateText(i + 1) }}</div>
+                  <div class="cr-name">{{ translateText(f.country) }}</div>
                   <div class="cr-bar-wrap"><div class="cr-bar"></div></div>
-                  <div class="cr-val">{{ fmtNum(f.value / 1e8) }}<span class="unit">亿元</span></div>
+                  <div class="cr-val">{{ translateText(fmtNum(f.value / 1e8)) }}<span class="unit">{{ translateText("亿元") }}</span></div>
                 </div>
               </div>
               <div v-else class="modern-empty-state">
-                {{ modernProvinceInfo.hasData ? '该年份暂无主要出口目的地数据' : '该年份暂无数据' }}
+                {{ translateText(modernProvinceInfo.hasData ? '该年份暂无主要出口目的地数据' : '该年份暂无数据') }}
               </div>
             </div>
           </transition>
@@ -320,6 +318,8 @@
 </template>
 
 <script setup>
+import { useLanguage } from '../utils/language.js'
+const { language, t: translateText } = useLanguage()
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import L from 'leaflet'
 import ChapterIntro from './ChapterIntro.vue'
@@ -618,6 +618,7 @@ function buildRuntimeRoute(routeId) {
   var via = nodes.slice(1, -1).map(function(node) { return node.name }).filter(Boolean)
   var modeText = routeMode === 'digitized' ? '历史路线复原' : '节点顺序路线'
   var baseFact = legacy && legacy.note ? legacy.note : (properties.note || '')
+  if (/\d[\d,.]*\s*(?:普特|磅|担|头|%|万担|千克)|利润/.test(baseFact)) baseFact = ''
   var sourceRefs = []
   if (legacy && Array.isArray(legacy.sourceRefs)) sourceRefs.push.apply(sourceRefs, legacy.sourceRefs)
   if (properties.source_url) sourceRefs.push(properties.source_url)
@@ -646,7 +647,7 @@ function buildRuntimeRoute(routeId) {
     via,
     historicalBackground: `${routeName}是${dynastyNames.join('至')}茶叶跨区域流通的重要通道。${baseFact || properties.note || ''}`,
     routeStory: `茶叶由${origin}出发${via.length ? `，依次经过${via.join('、')}` : ''}，抵达${destination}。地图以${modeText}方式呈现该通道；${routeMode === 'node_path' ? '有真实数字化线形的路段沿原GeoJSON绘制；缺少真实线形的相邻节点区间采用大圆路线连接，作为路线示意补充。' : '线形保留人工数字化成果的原始折点顺序与行进方向。'}`,
-    tradeSignificance: legacy && legacy.tradeSignificance ? legacy.tradeSignificance : `该路线连接了${origin}与${destination}，反映茶叶贸易带动的区域交流与市场扩展。`,
+    tradeSignificance: `该路线连接了${origin}与${destination}，反映茶叶贸易带动的区域交流与市场扩展。`,
     sourceRefs: Array.from(new Set(sourceRefs)),
     rawIndex: Number(routeId.replace(/\D/g, '')) || 0,
   }
@@ -3488,6 +3489,7 @@ onBeforeUnmount(function() {
 }
 
 .dynasty-tick.alternate .tick-label { top: 0; }
+.english-copy .dynasty-tick.alternate .tick-label { top: -12px; }
 
 .slider-track {
   position: absolute;
@@ -4050,4 +4052,23 @@ onBeforeUnmount(function() {
     width: auto; max-width: none; max-height: 45%;
   }
 }
+
+/* English sizes follow the corresponding Chinese sizes, minus 1px. */
+.english-copy .error-icon {font-size:calc(36px - 1px);}
+.english-copy .error-hint {font-size:calc(13px - 1px);}
+.english-copy .legend-title {font-size:calc(11px - 1px);}
+.english-copy :deep(.ch4-node-label-icon) {font-size:calc(13px - 1px);}
+.english-copy .legend-row {font-size:calc(10px - 1px);}
+.english-copy .current-dynasty-label {font-size:calc(16px - 1px);}
+.english-copy .legend-row {font-size:calc(10px - 1px);}
+.english-copy .ch4-tab .tab-icon {font-size:calc(15px - 1px);}
+.english-copy .title-sub {font-size:calc(13px - 1px);}
+.english-copy .title-sub .hl-num {font-size:calc(16px - 1px);}
+.english-copy .slider-label {font-size:calc(13px - 1px);}
+.english-copy .hc-row {font-size:calc(12px - 1px);}
+.english-copy .hc-empty {font-size:calc(12px - 1px);}
+.english-copy .legend-scale {font-size:calc(11px - 1px);}
+.english-copy .legend-hint {font-size:calc(11px - 1px);}
+.english-copy .province-trade-summary span {font-size:calc(10px - 1px);}
+.english-copy .cr-val .unit {font-size:calc(10px - 1px);}
 </style>

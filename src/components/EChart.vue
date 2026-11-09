@@ -5,6 +5,9 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import * as echarts from 'echarts'
+import { useLanguage } from '../utils/language.js'
+import { localizedChartOption, setChartLetterSpacing } from '../utils/chartLanguage.js'
+const { language } = useLanguage()
 
 const props = defineProps({
   option: { type: Object, required: true },
@@ -19,7 +22,8 @@ let ro = null
 onMounted(() => {
   if (!el.value) return
   chart = echarts.init(el.value, undefined, { renderer: 'canvas' })
-  chart.setOption(props.option, { notMerge: true })
+  chart.setOption(localizedChartOption(props.option, language.value === 'en'), { notMerge: true })
+  setChartLetterSpacing(chart, language.value === 'en')
   emit('ready', chart)
 
   chart.on('click', (params) => emit('click', params))
@@ -28,8 +32,11 @@ onMounted(() => {
   ro.observe(el.value)
 })
 
-watch(() => props.option, (newOption) => {
-  if (chart) chart.setOption(newOption, { notMerge: true })
+watch([() => props.option, language], ([newOption]) => {
+  if (chart) {
+    setChartLetterSpacing(chart, language.value === 'en')
+    chart.setOption(localizedChartOption(newOption, language.value === 'en'), { notMerge: true })
+  }
 }, { deep: true })
 
 onBeforeUnmount(() => {
