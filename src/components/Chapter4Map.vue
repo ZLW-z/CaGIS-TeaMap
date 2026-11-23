@@ -47,11 +47,11 @@
               <div class="legend-title">{{ translateText("图例") }}</div>
               <div class="legend-row">
                 <span class="legend-line land"></span>
-                <span>{{ translateText("陆路") }}</span>
+                <span>{{ language === 'en' ? 'Overland' : translateText('陆路') }}</span>
               </div>
               <div class="legend-row">
                 <span class="legend-line sea"></span>
-                <span>{{ translateText("海路") }}</span>
+                <span>{{ language === 'en' ? 'Maritime' : translateText('海路') }}</span>
               </div>
               <div class="legend-row">
                 <span class="legend-line digitized"></span>
@@ -172,7 +172,7 @@
             <!-- Floating Timeline (在地图容器内部，半悬浮) -->
             <div class="timeline-floating">
               <div class="timeline-header">
-                <span class="current-dynasty-label">{{ translateText(dynastyName) }}</span>
+                <span class="current-dynasty-label">{{ timelineDynastyLabel(dynastyName) }}</span>
                 <div class="timeline-controls">
                   <button class="play-btn" :class="{ playing: isPlaying }" @click="togglePlay">{{ translateText(isPlaying ? '暂停' : '播放') }}</button>
                   <button class="reset-btn" @click="resetView">{{ translateText("重置") }}</button>
@@ -191,11 +191,11 @@
                     class="dynasty-tick"
                     :class="{ active: dynastyName === tick.name, alternate: tick.index % 2 === 1 }"
                     :style="{ left: (tick.progress * 100) + '%' }"
-                    :aria-label="translateText(tick.name)"
+                    :aria-label="timelineDynastyLabel(tick.name)"
                     @mousedown.stop
                     @click="jumpToDynasty(tick)"
                   >
-                    <span class="tick-label">{{ translateText(tick.name) }}</span>
+                    <span class="tick-label">{{ timelineDynastyLabel(tick.name) }}</span>
                     <span class="tick-mark"></span>
                   </button>
                 </div>
@@ -207,7 +207,7 @@
                   :class="['route-filter-btn', { active: routeFilter === option.value }]"
                   :aria-pressed="routeFilter === option.value"
                   @click.stop="setRouteFilter(option.value)"
-                >{{ translateText(option.label) }}</button>
+                >{{ language === 'en' && option.value === 'land' ? 'Overland' : language === 'en' && option.value === 'sea' ? 'Maritime' : translateText(option.label) }}</button>
               </div>
             </div>
           </div>
@@ -222,8 +222,8 @@
           <div class="modern-topbar" :class="{ 'is-detail-mode': !isModernChinaMode }">
             <div v-if="!isModernChinaMode" class="modern-title">
               <span class="title-badge world">{{ translateText(selectedModernProvince || '中国') }}</span>
-              <span class="title-sub" v-if="modernProvinceInfo.hasData && modernProvinceInfo.flows.length">{{ translateText(modernYear) }}{{ translateText("年 出口总额 ") }}<b class="hl-num">{{ translateText(fmtNum(modernProvinceInfo.provinceValue / 1e8)) }}</b>{{ translateText(" 亿元，覆盖 ") }}<b class="hl-num">{{ translateText(modernProvinceInfo.flows.length) }}</b>{{ translateText(" 个主要国家") }}</span>
-              <span class="title-sub" v-else-if="modernProvinceInfo.hasData">{{ translateText(modernYear) }}{{ translateText("年 出口总额 ") }}<b class="hl-num">{{ translateText(fmtNum(modernProvinceInfo.provinceValue / 1e8)) }}</b>{{ translateText(" 亿元，暂无主要出口目的地数据") }}</span>
+              <span class="title-sub" v-if="modernProvinceInfo.hasData && modernProvinceInfo.flows.length">{{ translateText(modernYear) }}{{ translateText("年 出口总额 ") }}<b class="hl-num">{{ fmtNum(modernProvinceInfo.provinceValue / (language === 'en' ? 1e6 : 1e8)) }}</b>{{ language === 'en' ? ' CNY million, reaching ' : translateText(' 亿元，覆盖 ') }}<b class="hl-num">{{ translateText(modernProvinceInfo.flows.length) }}</b>{{ translateText(" 个主要国家") }}</span>
+              <span class="title-sub" v-else-if="modernProvinceInfo.hasData">{{ translateText(modernYear) }}{{ translateText("年 出口总额 ") }}<b class="hl-num">{{ fmtNum(modernProvinceInfo.provinceValue / (language === 'en' ? 1e6 : 1e8)) }}</b>{{ language === 'en' ? ' CNY million; no destination data available' : translateText(' 亿元，暂无主要出口目的地数据') }}</span>
               <span class="title-sub" v-else>{{ translateText([modernYear,"年该省暂无茶叶出口数据"].join('')) }}</span>
             </div>
             <div class="modern-controls">
@@ -239,7 +239,7 @@
           <!-- 茶叶形比例符号图例：概览与世界详情共用同一固定尺度 -->
           <div class="map-legend modern-legend">
             <div class="modern-legend-section">
-              <div class="modern-legend-title" style="font-family:var(--font-body),KaiTi,STKaiti,serif !important;font-style:normal !important">{{ translateText("茶叶符号大小：出口额（亿元）") }}</div>
+              <div class="modern-legend-title" style="font-family:var(--font-body),KaiTi,STKaiti,serif !important;font-style:normal !important">{{ language === 'en' ? 'Size: export value (CNY million)' : translateText('茶叶符号大小：出口额（亿元）') }}</div>
               <div class="leaf-size-legend">
                 <div v-for="item in leafSizeLegendItems" :key="item.ratio" class="leaf-size-item">
                   <span
@@ -247,12 +247,12 @@
                     :style="{ width: item.displaySize + 'px', height: item.displaySize + 'px' }"
                     v-html="createLeafSvg('#7F985D', false, 1)"
                   ></span>
-                  <span>{{ translateText(fmtNum(item.valueYi)) }}</span>
+                  <span>{{ fmtNum(item.valueYi * (language === 'en' ? 100 : 1)) }}</span>
                 </div>
               </div>
             </div>
             <div class="modern-legend-section color-section">
-              <div class="modern-legend-title" style="font-family:var(--font-body),KaiTi,STKaiti,serif !important;font-style:normal !important">{{ translateText("茶叶颜色：出口额同比增速") }}</div>
+              <div class="modern-legend-title" style="font-family:var(--font-body),KaiTi,STKaiti,serif !important;font-style:normal !important">{{ language === 'en' ? 'Colour: YOY growth in export value' : translateText('茶叶颜色：出口额同比增速') }}</div>
               <div class="leaf-color-legend">
                 <div v-for="item in leafColorLegendItems" :key="item.label" class="leaf-color-item">
                   <span class="legend-leaf color-leaf" v-html="createLeafSvg(item.color, false, 1)"></span>
@@ -279,7 +279,7 @@
 
           <!-- 世界模式：主要出口目的地 Top10 -->
           <transition name="panel-slide">
-            <div v-if="!isModernChinaMode" class="modern-country-panel">
+            <div v-if="!isModernChinaMode" class="modern-country-panel" :style="language === 'en' ? { width: modernEnglishPanelWidth + 'px', maxWidth: modernEnglishPanelWidth + 'px' } : null">
               <div class="panel-header">
                 <div class="panel-title-wrap">
                   <span class="panel-type-tag modern-tag">{{ translateText("全球流向") }}</span>
@@ -303,7 +303,7 @@
                   <div class="cr-rank">{{ translateText(i + 1) }}</div>
                   <div class="cr-name">{{ translateText(f.country) }}</div>
                   <div class="cr-bar-wrap"><div class="cr-bar"></div></div>
-                  <div class="cr-val">{{ translateText(fmtNum(f.value / 1e8)) }}<span class="unit">{{ translateText("亿元") }}</span></div>
+                  <div class="cr-val">{{ fmtNum(f.value / (language === 'en' ? 1e6 : 1e8)) }}<span class="unit">{{ language === 'en' ? 'CNY million' : translateText('亿元') }}</span></div>
                 </div>
               </div>
               <div v-else class="modern-empty-state">
@@ -361,6 +361,10 @@ function switchCh4Tab(k) {
 
 const MIN_YEAR = 618
 const MAX_YEAR = 1945
+function timelineDynastyLabel(name) {
+  if (language.value !== 'en') return translateText(name)
+  return { '唐代': 'Tang', '宋代': 'Song', '元代': 'Yuan', '明代': 'Ming', '清代': 'Qing', '民国': 'ROC' }[name] || translateText(name)
+}
 const dynasties = [
   { name: '唐代', start: 618, end: 959 },
   { name: '宋代', start: 960, end: 1270 },
@@ -2148,6 +2152,13 @@ var selectedModernProvince = ref(null)
 var hoveredProvince = ref(null)
 
 var modernMap = null
+const modernEnglishPanelWidth = ref(480)
+function updateModernEnglishPanelWidth() {
+  if (!modernMap) return
+  const mapWidth = modernMap.getSize().x
+  const japanEast = modernMap.latLngToContainerPoint([43.4, 146.0]).x
+  modernEnglishPanelWidth.value = Math.max(0, Math.min(520, mapWidth - Math.max(0, japanEast) - 32))
+}
 var modernProvLayer = null
 var modernWorldCountriesLayer = null
 var modernWorldRenderer = null
@@ -2820,6 +2831,8 @@ function initModernMap() {
     attributionControl: false,
   }
   modernMap = L.map(modernMapEl.value, mapOptions)
+  modernMap.on('move zoom resize', updateModernEnglishPanelWidth)
+  updateModernEnglishPanelWidth()
   modernWorldRenderer = L.canvas({ padding: 0.5, tolerance: 3 })
   modernMap.createPane('modernWorldCountriesPane')
   modernMap.getPane('modernWorldCountriesPane').style.zIndex = 220
@@ -3489,7 +3502,10 @@ onBeforeUnmount(function() {
 }
 
 .dynasty-tick.alternate .tick-label { top: 0; }
-.english-copy .dynasty-tick.alternate .tick-label { top: -12px; }
+.english-copy .dynasty-tick .tick-label {
+  top: auto;
+  bottom: 18px;
+}
 
 .slider-track {
   position: absolute;
@@ -3948,6 +3964,20 @@ onBeforeUnmount(function() {
   border: 1px solid rgba(178, 143, 76, 0.15);
   display: flex;
   flex-direction: column;
+}
+.english-copy .modern-country-panel .country-row {
+  grid-template-columns: 22px minmax(92px, 1fr) minmax(32px, .6fr) auto;
+}
+.english-copy .modern-country-panel .cr-name {
+  white-space: normal;
+  line-height: 1.3;
+}
+.english-copy .modern-country-panel .province-trade-summary {
+  grid-template-columns: 1.25fr 1fr 1fr;
+  gap: 12px;
+}
+.english-copy .modern-country-panel .province-trade-summary b {
+  white-space: normal;
 }
 .modern-country-panel .panel-scroll {
   flex: 1;

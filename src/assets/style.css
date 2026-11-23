@@ -4,6 +4,19 @@
 @import url("https://fontsapi.zeoseven.com/874/main/result.css");
 @import url("https://fontsapi.zeoseven.com/2103/main/result.css");
 @import url("https://fontsapi.zeoseven.com/256/main/result.css");
+@import url("./chinese-title-font.css");
+@font-face {
+  font-family: "Cormorant";
+  src: url('/fonts/cormorant/Cormorant-variable.ttf') format('truetype');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {font-family:"TeX Gyre Pagella";src:url('/fonts/tex-gyre-pagella/texgyrepagella-regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;}
+@font-face {font-family:"TeX Gyre Pagella";src:url('/fonts/tex-gyre-pagella/texgyrepagella-bold.otf') format('opentype');font-weight:700;font-style:normal;font-display:swap;}
+@font-face {font-family:"TeX Gyre Pagella";src:url('/fonts/tex-gyre-pagella/texgyrepagella-italic.otf') format('opentype');font-weight:400;font-style:italic;font-display:swap;}
+@font-face {font-family:"TeX Gyre Pagella";src:url('/fonts/tex-gyre-pagella/texgyrepagella-bolditalic.otf') format('opentype');font-weight:700;font-style:italic;font-display:swap;}
+
 
 /* ============================================================
    山海一叶 · 全局样式（Vue 项目）
@@ -409,7 +422,7 @@ main#story{display:block;}
 }
 #app-root .english-copy,
 #app-root .english-copy :not(.keep-chinese):not(.keep-chinese *) {
-  font-family: "Times New Roman", serif !important;
+  font-family: "TeX Gyre Pagella", serif !important;
   letter-spacing: .05em !important;
   word-break: normal !important;
   overflow-wrap: normal !important;
@@ -436,8 +449,19 @@ main#story{display:block;}
 #app-root .english-copy .chapter-corner-description {
   font-size: var(--font-size-body) !important;
 }
+#app-root .english-copy .chapter-corner-description.chapter-corner-title-en {
+  font-size: 20px !important;
+  color: #405c2d;
+}
 .english-copy .chapter-corner-title-en {
   margin-bottom: 6px;
 }
 #app-root .english-copy .intro-title-row.keep-chinese .intro-char { font-size: 100px; }
 #app-root .english-copy .intro-ch-no.keep-chinese { font-size: 80px; }
+
+/* English headings; Chinese headings retain their original typeface. */
+#app-root .english-copy :is(h1,h2,h3,h4,h5,h6,.prologue-title,.ep-title,.intro-title-row,.chapter-corner-title-en,.ltp-title,.panel-title,.preview-title,.map-title,.notes-factor-title,.card-title-sm,.sb-title,.lv-cc-title,.lv-chart-title,.lv-stages-title,.lv-products-title,.lv-detail-heading,.hc-title):not(.keep-chinese):not(.keep-chinese *),
+#app-root .english-copy :is(h1,h2,h3,h4,h5,h6,.prologue-title,.ep-title,.intro-title-row,.chapter-corner-title-en,.ltp-title,.panel-title,.preview-title,.map-title,.notes-factor-title,.card-title-sm,.sb-title,.lv-cc-title,.lv-chart-title,.lv-stages-title,.lv-products-title,.lv-detail-heading,.hc-title):not(.keep-chinese):not(.keep-chinese *) :not(.keep-chinese):not(.keep-chinese *) {
+  font-family: "Cormorant", "TeX Gyre Pagella", serif !important;
+  font-weight: 600 !important;
+}

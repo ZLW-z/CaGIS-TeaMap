@@ -33,7 +33,7 @@
             <i class="layer-scroll-chevron"></i>
             <i class="layer-scroll-chevron"></i>
           </span>
-          <span class="layer-scroll-hint">{{ t('滚动查看其他图层') }}</span>
+          <span class="layer-scroll-hint">{{ language === 'en' ? 'Scroll to continue' : t('滚动查看其他图层') }}</span>
         </div>
       </div>
 
@@ -41,9 +41,9 @@
       <div class="map-legend">
         <div class="legend-title">{{ t('图 例') }}</div>
         <div class="legend-row tang" :class="{ dim: stage < 1 }">
-          <span class="sw tang-sw"></span>{{ t('唐代产茶区') }}
+          <span class="sw tang-sw"></span>{{ language === 'en' ? 'Tea regions in Tang Dynasty' : t('唐代产茶区') }}
         </div>
-        <div class="legend-subtitle">{{ t('古茶树 · 现存资源') }}</div>
+        <div class="legend-subtitle">{{ language === 'en' ? 'Ancient tea bush' : t('古茶树 · 现存资源') }}</div>
         <div class="legend-row t1" :class="{ dim: stage < 2 }">
           <span class="sw t-sw"></span>{{ t('野生型') }} <span class="count">（{{ counts[1] }}）</span>
         </div>
@@ -210,7 +210,8 @@ function onMapWheel(event) {
 const currentTextItem = computed(() => {
   if (currentTextIdx.value < 0 || currentTextIdx.value >= LAYER_TEXTS.length) return null
   const item = LAYER_TEXTS[currentTextIdx.value]
-  return { tag: t(item.tag), title: t(item.title), desc: t(item.desc) }
+  const tag = language.value === 'en' ? ['I', 'II', 'III', 'IV', 'V'][currentTextIdx.value] : t(item.tag)
+  return { tag, title: t(item.title), desc: t(item.desc) }
 })
 
 // 播放图层文字浮现动画（参考 GSAP）
@@ -922,6 +923,13 @@ onBeforeUnmount(() => {
   margin: 0;
   letter-spacing: 0.02em;
   text-align: justify;
+}
+
+.english-copy .ltp-desc {
+  text-align: left;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
 }
 
 .layer-scroll-guide {

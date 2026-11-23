@@ -8,6 +8,14 @@ import geographyEnglish from '../data/geographyEnglish.json'
 
 const normalize = text => text.replace(/\s+/g, '').replace(/[｜|]/g, '至')
 const displayEnglish = {...geographyEnglish, ...documentEnglish,
+  '茶生山水间': 'Origins',
+  '何以生茶': 'Nurture',
+  '云雾深处': 'Celebrity',
+  '一叶行远': 'Trade',
+  '今日茶境': 'Flourish',
+  '世界共饮': 'Culture',
+  '一叶行远·古代贸易发展': 'Trade · Historical Tea Trade',
+  '一叶行远·当代贸易情况': 'Trade · Contemporary Tea Trade',
   '出口额': 'Export value',
   '出口额：': 'Export value: ',
   '年 出口总额': ' Total exports: ',
@@ -29,7 +37,7 @@ const templates = Object.entries(displayEnglish).filter(([zh]) => zh.includes('{
   zh, en, pattern: new RegExp('^'+zh.split('{变量}').map(part => escapePattern(normalize(part))).join('(.+?)')+'$')
 })).sort((a,b) => b.zh.replaceAll('{变量}','').length - a.zh.replaceAll('{变量}','').length)
 
-export function translateCopy(value) {
+function translateRaw(value) {
   if (typeof value !== 'string' || !value.trim()) return value
   if (!/[\u3400-\u9fff]/.test(value)) return value
   const exact = approved.get(normalize(value))
@@ -57,6 +65,20 @@ export function translateCopy(value) {
   result = value
   for (const [zh, en] of terms) result = result.replaceAll(zh, en)
   return result
+}
+
+// Convert display quantities without changing source data or Chinese output.
+export function englishQuantity(value) {
+  if (typeof value !== 'string') return value
+  value = value.replace(/(Start:\s*)([\d,.]+)(\s*→\s*End:\s*)([\d,.]+)\s*×\s*10,000 tonnes/g, (_, a, b, c, d) => a + (Number(b.replaceAll(',', '')) * 10000) + c + (Number(d.replaceAll(',', '')) * 10000) + ' tonnes')
+  const number = n => Number((Number(n.replaceAll(',', ''))).toFixed(6)).toLocaleString('en-US', {maximumFractionDigits: 6})
+  return value.replace(/([\d,]+(?:\.\d+)?)\s*(?:×\s*)?(?:CNY\s*100 million|CNY\s*100m)/g, (_, n) => number(String(Number(n.replaceAll(',', '')) * 100)) + ' CNY million')
+    .replace(/([\d,]+(?:\.\d+)?)\s*(?:×\s*)?10,000 (tonnes|t|hectares)/g, (_, n, unit) => number(String(Number(n.replaceAll(',', '')) * 10000)) + ' ' + unit)
+    .replace(/([\d,]+(?:\.\d+)?)\s*(?:×\s*)?1,000 (hectares|ha)/g, (_, n, unit) => number(String(Number(n.replaceAll(',', '')) * 1000)) + ' ' + unit)
+}
+export function translateCopy(value) {
+  const result = englishQuantity(translateRaw(value))
+  return typeof result === 'string' ? result.replace(/CNY 100 million|CNY 100m/g, 'CNY million').replace(/\(10,000 tonnes\)/g, '(tonnes)').replace(/\(1,000 hectares\)/g, '(hectares)').replace(/^10,000 tonnes$/, 'tonnes').replace(/^1,000 hectares$/, 'hectares') : result
 }
 
 const storageKey = 'cagis-teamap-language'

@@ -27,9 +27,9 @@ const FACTORS = {
     desc: '年平均气温 15–25℃ 最适宜，13–15℃ 或 25–35℃ 次适宜，低于 13℃ 或高于 35℃ 不适宜',
     levels: [
       { value: 0, label: '不适宜', color: '#E8E2D0', range: '多年均温<10℃或>30℃' },
-      { value: 1, label: '低温适宜', color: '#9AC4D6', range: '多年均温10-15℃' },
-      { value: 2, label: '中温适宜', color: '#5C9EAF', range: '多年均温15-20℃' },
-      { value: 3, label: '高温适宜', color: '#C8462E', range: '多年均温20-30℃' },
+      { value: 1, label: '限制适宜', color: '#9AC4D6', range: '多年均温10-15℃' },
+      { value: 2, label: '较适宜', color: '#5C9EAF', range: '多年均温15-20℃' },
+      { value: 3, label: '最适宜', color: '#C8462E', range: '多年均温20-30℃' },
     ],
   },
   accum: {

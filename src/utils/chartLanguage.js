@@ -19,25 +19,32 @@ export function localizedChartOption(option, english) {
     if (Array.isArray(value)) return value.map(v => visit(v, key))
     if (!value || typeof value !== 'object') return value
     const copy = {}
+    if (/Axis$/.test(key) && typeof value.name === 'string') {
+      const scale = value.name.includes('亿元') ? 100 : value.name.includes('万吨') ? 10000 : value.name.includes('千公顷') ? 1000 : 1
+      if (scale !== 1) {
+        const result = visit({...value, name: value.name.replace('亿元', 'CNY million').replace('万吨', 'tonnes').replace('千公顷', 'hectares'), axisLabel: {...value.axisLabel, formatter: n => Number((Number(n) * scale).toFixed(6)).toLocaleString('en-US')}}, key)
+        return result
+      }
+    }
     for (const [k,v] of Object.entries(value)) {
       if (k === 'formatter') copy[k] = displayFormatter(v)
       else if (['text','subtext','nameText','unit'].includes(k) && typeof v === 'string') copy[k] = translateCopy(v)
       else if (k === 'name' && /Axis$/.test(key) && typeof v === 'string') copy[k] = translateCopy(v)
-      else if (k === 'fontFamily') copy[k] = 'Times New Roman'
+      else if (k === 'fontFamily') copy[k] = 'TeX Gyre Pagella'
       else if (k === 'fontSize' && typeof v === 'number') copy[k] = Math.max(1,v-1)
       else copy[k] = visit(v,k)
     }
     if (['label','axisLabel','legend'].includes(key) && !('formatter' in copy)) copy.formatter = displayFormatter()
     if (['label','axisLabel'].includes(key)) {
-      copy.fontFamily = 'Times New Roman'
+      copy.fontFamily = 'TeX Gyre Pagella'
       copy.fontSize ??= 11
     }
-    if (key === 'legend') copy.textStyle = {...copy.textStyle,fontFamily:'Times New Roman',fontSize:copy.textStyle?.fontSize ?? 11}
-    if (key === 'tooltip') copy.textStyle = {...copy.textStyle,fontFamily:'Times New Roman',fontSize:copy.textStyle?.fontSize ?? 13}
+    if (key === 'legend') copy.textStyle = {...copy.textStyle,fontFamily:'TeX Gyre Pagella',fontSize:copy.textStyle?.fontSize ?? 11}
+    if (key === 'tooltip') copy.textStyle = {...copy.textStyle,fontFamily:'TeX Gyre Pagella',fontSize:copy.textStyle?.fontSize ?? 13}
     return copy
   }
   const result = visit(option)
-  result.textStyle = {...result.textStyle, fontFamily:'Times New Roman',fontSize:result.textStyle?.fontSize ?? 11}
+  result.textStyle = {...result.textStyle, fontFamily:'TeX Gyre Pagella',fontSize:result.textStyle?.fontSize ?? 11}
   return result
 }
 

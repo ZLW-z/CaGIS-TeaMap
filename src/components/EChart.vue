@@ -19,8 +19,9 @@ const el = ref(null)
 let chart = null
 let ro = null
 
-onMounted(() => {
-  if (!el.value) return
+onMounted(async () => {
+  if (language.value === 'en') await document.fonts.load('12px "TeX Gyre Pagella"')
+  if (!el.value?.isConnected) return
   chart = echarts.init(el.value, undefined, { renderer: 'canvas' })
   chart.setOption(localizedChartOption(props.option, language.value === 'en'), { notMerge: true })
   setChartLetterSpacing(chart, language.value === 'en')
@@ -32,7 +33,8 @@ onMounted(() => {
   ro.observe(el.value)
 })
 
-watch([() => props.option, language], ([newOption]) => {
+watch([() => props.option, language], async ([newOption]) => {
+  if (language.value === 'en') await document.fonts.load('12px "TeX Gyre Pagella"')
   if (chart) {
     setChartLetterSpacing(chart, language.value === 'en')
     chart.setOption(localizedChartOption(newOption, language.value === 'en'), { notMerge: true })

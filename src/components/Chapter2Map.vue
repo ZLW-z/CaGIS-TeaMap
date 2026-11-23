@@ -1832,9 +1832,10 @@ const noteLevelExtra = computed(() => CLASSIFICATION_EXTRA[activeNoteKey.value] 
 const noteFields = computed(() => {
   const n = activeNote.value
   if (!n) return []
+  const englishFactor = language.value === 'en' && ['precip', 'temp', 'accum', 'rad', 'ph'].includes(activeNoteKey.value)
   return [
-    { key: 'dataName',     label: '数据名称',   text: n.dataName },
-    { key: 'dataSource',   label: '数据来源',   text: n.dataSource },
+    ...(!englishFactor ? [{ key: 'dataName', label: '数据名称', text: n.dataName }] : []),
+    { key: 'dataSource',   label: englishFactor ? 'Data Source' : '数据来源', text: n.dataSource },
     { key: 'timeRange',    label: '时间范围',   text: n.timeRange },
     { key: 'resolution',   label: '空间分辨率', text: n.resolution },
     { key: 'unit',         label: '原始单位',   text: n.unit },

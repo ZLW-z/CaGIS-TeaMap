@@ -43,7 +43,7 @@
                       :fill="activePhonePanel === 'leaves' ? 'rgba(92,124,58,0.95)' : 'rgba(247,244,235,0.92)'" />
                 <text x="14" y="24"
                       :fill="activePhonePanel === 'leaves' ? '#FFF8E8' : '#5C7C3A'"
-                      :style="{ fontSize: language === 'en' ? '11.5px' : '12.5px' }" style="font-weight:500;letter-spacing:0.05em">{{ translateText("叶片 · 新生") }}</text>
+                      :style="{ fontSize: language === 'en' ? '11.5px' : '12.5px' }" style="font-weight:500;letter-spacing:0.05em"><template v-if="language === 'en'"><tspan style="font-size:14px;font-weight:700">Leaves</tspan><tspan dx="6" style="font-size:11.5px;font-weight:500">New Growth</tspan></template><template v-else>{{ translateText("叶片 · 新生") }}</template></text>
                 <text x="14" y="41"
                       :fill="activePhonePanel === 'leaves' ? '#EFE9DA' : '#5A6655'"
                       :style="{ fontSize: language === 'en' ? '8px' : '9px' }" style="font-weight:500;letter-spacing:0.02em">{{ translateText("茶叶内销量") }}</text>
@@ -69,7 +69,7 @@
                       :fill="activePhonePanel === 'branches' ? 'rgba(107,68,35,0.95)' : 'rgba(247,244,235,0.92)'" />
                 <text x="14" y="24"
                       :fill="activePhonePanel === 'branches' ? '#FFF8E8' : '#6B4423'"
-                      :style="{ fontSize: language === 'en' ? '11.5px' : '12.5px' }" style="font-weight:500;letter-spacing:0.05em">{{ translateText("枝条 · 远拓") }}</text>
+                      :style="{ fontSize: language === 'en' ? '11.5px' : '12.5px' }" style="font-weight:500;letter-spacing:0.05em"><template v-if="language === 'en'"><tspan style="font-size:14px;font-weight:700">Branches</tspan><tspan dx="6" style="font-size:11.5px;font-weight:500">Reaching Out</tspan></template><template v-else>{{ translateText("枝条 · 远拓") }}</template></text>
                 <text x="14" y="41"
                       :fill="activePhonePanel === 'branches' ? '#EFE9DA' : '#5A6655'"
                       :style="{ fontSize: language === 'en' ? '8px' : '9px' }" style="font-weight:500;letter-spacing:0.02em">{{ translateText("茶叶出口额") }}</text>
@@ -95,7 +95,7 @@
                       :fill="activePhonePanel === 'roots' ? 'rgba(178,143,76,0.95)' : 'rgba(247,244,235,0.92)'" />
                 <text x="14" y="24"
                       :fill="activePhonePanel === 'roots' ? '#FFF8E8' : '#B28F4C'"
-                      :style="{ fontSize: language === 'en' ? '11.5px' : '12.5px' }" style="font-weight:500;letter-spacing:0.05em">{{ translateText("根系 · 深植") }}</text>
+                      :style="{ fontSize: language === 'en' ? '11.5px' : '12.5px' }" style="font-weight:500;letter-spacing:0.05em"><template v-if="language === 'en'"><tspan style="font-size:14px;font-weight:700">Roots</tspan><tspan dx="6" style="font-size:11.5px;font-weight:500">Growing Deep</tspan></template><template v-else>{{ translateText("根系 · 深植") }}</template></text>
                 <text x="14" y="41"
                       :fill="activePhonePanel === 'roots' ? '#EFE9DA' : '#5A6655'"
                       :style="{ fontSize: language === 'en' ? '8px' : '9px' }" style="font-weight:500;letter-spacing:0.02em">{{ translateText("全国茶园面积") }}</text>
@@ -157,11 +157,11 @@
               <div class="wf-overview-grid">
                 <div class="ch5-overview-card small-card">
                   <div class="ov-label">{{ translateText("茶园面积") }}</div>
-                  <div class="ov-value"><span class="ch5-stat-num">{{ translateText(fmt(rootsOverview.gardenArea, 2)) }}</span><span class="ov-unit">{{ translateText("千公顷") }}</span></div>
+                  <div class="ov-value"><span class="ch5-stat-num">{{ translateText(fmt(rootsOverview.gardenArea * (language === 'en' ? 1000 : 1), 2)) }}</span><span class="ov-unit">{{ language === 'en' ? 'ha' : translateText('千公顷') }}</span></div>
                 </div>
                 <div class="ch5-overview-card small-card">
                   <div class="ov-label">{{ translateText("茶叶产量") }}</div>
-                  <div class="ov-value"><span class="ch5-stat-num">{{ translateText(fmt(rootsOverview.totalOutput, 2)) }}</span><span class="ov-unit">{{ translateText("万吨") }}</span></div>
+                  <div class="ov-value"><span class="ch5-stat-num">{{ translateText(fmt(rootsOverview.totalOutput * (language === 'en' ? 10000 : 1), 2)) }}</span><span class="ov-unit">{{ language === 'en' ? 't' : translateText('万吨') }}</span></div>
                 </div>
                 <div class="ch5-overview-card small-card">
                   <div class="ov-label">{{ translateText("产量同比") }}</div>
@@ -416,7 +416,7 @@
               <div class="wf-overview-grid">
                 <div class="ch5-overview-card small-card">
                   <div class="ov-label">{{ translateText("出口总额") }}</div>
-                  <div class="ov-value"><span class="ch5-stat-num">{{ translateText(fmt(branchesOverview.totalExport / 1e8, 2)) }}</span><span class="ov-unit">{{ translateText("亿") }}</span></div>
+                  <div class="ov-value"><span class="ch5-stat-num">{{ fmt(branchesOverview.totalExport / (language === 'en' ? 1e6 : 1e8), 2) }}</span><span class="ov-unit">{{ language === 'en' ? ' CNY million' : translateText('亿') }}</span></div>
                 </div>
                 <div class="ch5-overview-card small-card">
                   <div class="ov-label">{{ translateText("首位目的地") }}</div>
@@ -703,6 +703,7 @@ const leavesVolumeTrendOption = computed(() => {
         const yr = ps[0].axisValue
         const item = data.find(x => String(x.year) === String(yr))
         if (!item) return `${yr}年`
+        if (language.value === 'en') return `<b>${yr}</b><br/><span style="white-space:nowrap">${fmt(item.volume * 10000, 0)} tonnes</span>`
         const s = sourceShort[item.year] || '公开资料'
         return `<b>${yr}年</b><br/>内销量：${fmt(item.volume, 2)} 万吨<br/><span style="font-size:10px;color:#8A8270">${s}</span>`
       },
@@ -802,6 +803,7 @@ const leavesValuePriceOption = computed(() => {
         const item = data.find(x => String(x.year) === String(yr))
         if (!item) return `${yr}年`
         const valQual = item.valueQualifier === '约数' ? '（约）' : ''
+        if (language.value === 'en') return `<b>${yr}</b><br/><span style="white-space:nowrap">${item.valueQualifier === '约数' ? '≈ ' : ''}${fmt(item.value * 100, 2)} CNY million</span><br/><span style="white-space:nowrap">${fmt(item.avgPrice, 2)} CNY/kg</span>`
         return `<b>${yr}年</b><br/>内销总额：${fmt(item.value, 2)} 亿元${valQual}<br/>平均单价：${fmt(item.avgPrice, 2)} 元/千克`
       },
       confine: true,
@@ -923,8 +925,10 @@ const leavesOnlineOption = computed(() => {
         const item = data.find(x => String(x.year) === String(p.axisValue))
         if (!item) return `${p.axisValue}年`
         if (item.qualifier === '缺失') {
+          if (language.value === 'en') return `<b>${p.axisValue}</b><br/><span style="color:#A8453A">Data unavailable</span>`
           return `<b>${p.axisValue}年</b><br/><span style="color:#A8453A">数据缺失</span>`
         }
+        if (language.value === 'en') return `<b>${p.axisValue}</b><br/><span style="white-space:nowrap">${translateText(item.displayValue)}</span>`
         return `<b>${p.axisValue}年</b><br/>线上交易额：${item.displayValue}`
       },
       confine: true,
@@ -1231,6 +1235,12 @@ function createRootsGeoOption() {
   return [
     {
       map: ROOTS_CHINA_MAP_NAME,
+      ...(language.value === 'en' ? { tooltip: { formatter: p => {
+        const d = p.data
+        if (d && d.gardenArea != null) return `<b>${translateText(d.name || p.name)}</b><br/>Tea plantation area:<br/><span style="white-space:nowrap">${fmt(d.gardenArea * 1000, 0)} hectares</span><br/>Coverage: ${fmt(d.coverage, 3)} %`
+        if (d && d.totalOutput != null) return `<b>${translateText(d.name || p.name)}</b><br/>Tea production:<br/><span style="white-space:nowrap">${fmt(d.totalOutput * 10000, 2)} tonnes</span>`
+        return translateText(p.name)
+      } } } : {}),
       projection: CHINA_ALBERS_PROJECTION,
       roam: true,
       zoom: currentGeoZoom.value,
@@ -1350,6 +1360,7 @@ const rootsMapOption = computed(() => {
           if (p.componentType === 'geo') return `${p.name}<br/>（点击气泡查看省份详情）`
           const d = p.data
           if (!d || !d.gardenArea) return `${p.name}<br/>暂无数据`
+          if (language.value === 'en') return `<b>${translateText(d.name)}</b> (${yr})<br/>Tea plantation area:<br/><span style="white-space:nowrap">${fmt(d.gardenArea * 1000, 0)} hectares</span><br/>Coverage: ${fmt(d.coverage, 3)} %`
           return `<b>${d.name}</b>（${yr}年）<br/>茶园面积：${fmt(d.gardenArea, 2)} 千公顷<br/>覆盖率：${fmt(d.coverage, 3)} %`
         },
       },
@@ -1359,7 +1370,7 @@ const rootsMapOption = computed(() => {
         max: coverageMax,
         left: 12,
         bottom: 14,
-        text: ['', '覆盖率'],
+        text: ['', language.value === 'en' ? 'Coverage' : '覆盖率'],
         textStyle: { ...chartTextStyle, color: '#5A6655', fontSize: 9 },
         // 茶金色系：与「茶园面积」按钮主题色 #B28F4C 一致
         inRange: { color: ['#FBF5E2', '#E8D5A5', '#C9A866', '#8E7038', '#5C4A22'] },
@@ -1442,7 +1453,7 @@ const rootsMapOption = computed(() => {
       max: 20,
       left: 12,
       bottom: 18,
-      text: ['', '同比增长率'],
+      text: ['', language.value === 'en' ? 'YOY growth rate' : '同比增长率'],
       textStyle: { ...chartTextStyle, color: '#5A6655', fontSize: 9 },
       inRange: { color: ['#CDDABE', '#AFC39A', '#88A36B', '#5F7D45', '#355326'] },
       calculable: false,
@@ -1508,6 +1519,9 @@ const rootsProvinceDetail = computed(() => {
   }
 })
 
+function rootsEnglishValue(value) {
+  return fmt(Number(value) * (metric.value === 'gardenArea' ? 1000 : 10000), 0) + (metric.value === 'gardenArea' ? ' hectares' : ' tonnes')
+}
 const rootsProvinceTrendOption = computed(() => {
   const detail = rootsProvinceDetail.value
   if (!detail || !detail.years.length) return {}
@@ -1528,6 +1542,7 @@ const rootsProvinceTrendOption = computed(() => {
       formatter: ps => {
         const v = ps[0]?.value
         const y = ps[0]?.axisValue ?? v?.axisValue
+        if (language.value === 'en') return `<b>${y}</b><br/><span style="white-space:nowrap">${rootsEnglishValue(v?.value ?? v?.data ?? ps[0]?.value)}</span>`
         return `<b>${y}年</b><br/>${metricLabel.value}：${fmt(v?.value ?? v?.data ?? ps[0]?.value, 2)} ${metricUnit.value}`
       },
     },
@@ -1591,7 +1606,9 @@ const rootsRankingOption = computed(() => {
       trigger: 'axis',
       confine: true,
       extraCssText: 'max-width:220px; white-space:pre-wrap;',
-      formatter: ps => `<b>${ps[0].name}</b><br/>${metricLabel.value}：${fmt(ps[0].value, 2)} ${metricUnit.value}`,
+      formatter: ps => language.value === 'en'
+        ? `<b>${translateText(ps[0].name)} (${rootsYear.value})</b><br/><span style="white-space:nowrap">${rootsEnglishValue(ps[0].value)}</span>`
+        : `<b>${ps[0].name}</b><br/>${metricLabel.value}：${fmt(ps[0].value, 2)} ${metricUnit.value}`,
     },
     grid: { containLabel: true, left: 12, right: 16, top: 12, bottom: 24 },
     xAxis: {
@@ -1696,6 +1713,13 @@ const branchesSankeyOption = computed(() => {
       confine: true,
       extraCssText: 'max-width:240px; white-space:pre-wrap;',
       formatter: p => {
+        if (language.value === 'en') {
+          const edge = p.dataType === 'edge'
+          const heading = edge ? `${translateText(p.data.source)} → ${translateText(p.data.target)}` : translateText(p.name)
+          const amount = edge ? p.data.value : p.data.totalValue
+          const label = edge ? 'Export value' : p.data.category === 'province' ? 'Total exports' : 'Total imports'
+          return `<b>${heading}</b><br/>${label}:<br/><span style="white-space:nowrap">${fmt(amount / 1e6, 2)} CNY million</span>`
+        }
         if (p.dataType === 'edge') {
           return `<b>${p.data.source} → ${p.data.target}</b><br/>出口额：${fmt(p.data.value / 1e8, 2)} 亿元`
         }
@@ -1751,7 +1775,9 @@ const branchesCountryRankOption = computed(() => {
       trigger: 'axis',
       confine: true,
       extraCssText: 'max-width:220px; white-space:pre-wrap;',
-      formatter: ps => `<b>${ps[0].name}</b><br/>出口额：${fmt(ps[0].value, 2)} 亿元`,
+      formatter: ps => language.value === 'en'
+        ? `<b>${translateText(ps[0].name)}</b><br/><span style="white-space:nowrap">${fmt(ps[0].value * 100, 2)} CNY million</span>`
+        : `<b>${ps[0].name}</b><br/>出口额：${fmt(ps[0].value, 2)} 亿元`,
     },
     grid: { containLabel: true, left: 12, right: 16, top: 12, bottom: 24 },
     xAxis: {
@@ -1830,6 +1856,7 @@ const branchesTrendOption = computed(() => {
       formatter: ps => {
         const v = ps[0]?.value
         if (v == null) return `<b>${ps[0]?.axisValue ?? ''}年</b><br/>暂无出口数据`
+        if (language.value === 'en') return `<b>${ps[0]?.axisValue ?? ''}</b><br/><span style="white-space:nowrap">${fmt(v * 100, 2)} CNY million</span>`
         return `<b>${ps[0]?.axisValue ?? ''}年</b><br/>出口总额：${fmt(v, 2)} 亿元`
       },
     },
@@ -1987,7 +2014,7 @@ onMounted(async () => {
       rgba(247, 244, 235, 0.08) 52%,
       rgba(247, 244, 235, 0.24) 100%
     ),
-    url('/data/5/today-tea-garden-bg-v4.png');
+    url('/data/5/today-tea-garden-cyan-sky.png');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: 30% center;

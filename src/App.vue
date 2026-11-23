@@ -507,7 +507,7 @@ onBeforeUnmount(() => {
   transition: background-color .2s ease, color .2s ease;
 }
 .language-switch button[lang="en"] {
-  font-family: "Times New Roman", serif;
+  font-family: "TeX Gyre Pagella", serif;
 }
 .language-switch button:hover {
   background: rgba(81, 109, 51, .1);
