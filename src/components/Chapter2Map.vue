@@ -1223,7 +1223,8 @@ function _pinElForAnim(el, rect, zIndex) {
   }
 }
 
-/** 用 CSS transition 把 el 从 sourceRect 形变到 targetRect。
+/** 用 CSS transition 将 el 等比例缩放并移动至 targetRect 的中心。
+ *  缩略图和主图的长宽比不同；使用 contain 而非非均匀 scale，避免地图及其图层被拉伸、分离。
  *  options: durationMs、fadeOut（末段淡出，淡出开始时间 fadeStartMs、淡出时长 fadeDurationMs）。*/
 function _animateDomToRect(el, sourceRect, targetRect, {
   durationMs = 1400,
@@ -1233,17 +1234,17 @@ function _animateDomToRect(el, sourceRect, targetRect, {
   ease = 'cubic-bezier(0.45, 0.05, 0.35, 0.95)',
 } = {}) {
   if (!el || !sourceRect || !targetRect) return
-  const sx = targetRect.width / sourceRect.width
-  const sy = targetRect.height / sourceRect.height
-  const tx = targetRect.left - sourceRect.left
-  const ty = targetRect.top - sourceRect.top
-  // transform-origin: 0 0; 复合矩阵作用顺序：先 scale 再 translate，但
-  // CSS transform 列表是 reverse application: 'translate(...) scale(...)' 表示
-  // 先 scale 后 translate；最右边的先生效。所以 translate 在后意为位移是
-  // 在缩放后的坐标系内做平移，刚好让 fixed 坐标原 rect → targetRect 的形变
-  // 可以看作"先把 rect 缩放到 target 矩形大小，再把原点位移到 target.left-top"。
-  // 我们的写法是先 translate 后 scale，浏览器解析时是反着的：先 scale 再 translate。
-  const finalTransform = `translate(${tx}px, ${ty}px) scale(${sx}, ${sy})`
+  const scale = Math.min(
+    targetRect.width / sourceRect.width,
+    targetRect.height / sourceRect.height,
+  )
+  const scaledWidth = sourceRect.width * scale
+  const scaledHeight = sourceRect.height * scale
+  const tx = targetRect.left + (targetRect.width - scaledWidth) / 2 - sourceRect.left
+  const ty = targetRect.top + (targetRect.height - scaledHeight) / 2 - sourceRect.top
+  // transform-origin 为左上角。保持 x / y 使用同一 scale，并将结果居中在缩略图的
+  // 地图区内，确保 Leaflet 的底图、栅格及边界线始终作为一个整体缩放。
+  const finalTransform = `translate(${tx}px, ${ty}px) scale(${scale})`
 
   let transitionCss = `transform ${durationMs}ms ${ease}`
   if (fadeOut) {
