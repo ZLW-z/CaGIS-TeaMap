@@ -10,7 +10,7 @@
 
     <div class="map-fullscreen" :class="{ show: introDone }">
       <ChapterCornerIntro chapter-key="ch3" :visible="introDone" />
-      <div ref="mapEl" class="map"></div>
+      <div ref="mapEl" class="map" :class="{ 'tea-labels-ready': introLabelsReady }"></div>
 
       <!-- 图例 -->
       <div class="map-legend">
@@ -202,6 +202,7 @@ let provinceLoadFinished = false
 let introSequenceRequested = false
 let introSequenceStarted = false
 let introCameraAnimating = false
+const introLabelsReady = ref(false)
 
 const CHINA_OVERVIEW_HOLD_MS = 800
 const TEA_AREA_FLY_DURATION_MS = 4500
@@ -261,8 +262,22 @@ function animateToTeaArea() {
     introCameraFrame = null
     introCameraAnimating = false
     map.setView(TEA_AREA.center, TEA_AREA.zoom, { animate: false })
+    // Reapply the original polygon fill after the fractional-zoom camera ends.
+    provinceLayer?.setStyle({
+      color: PROV_STYLE.color,
+      weight: PROV_STYLE.weight,
+      fill: true,
+      fillColor: PROV_STYLE.fillColor,
+      fillOpacity: PROV_STYLE.fillOpacity,
+    })
     provinceLayer?.eachLayer(layer => layer.redraw?.())
-    requestAnimationFrame(() => layoutLabels())
+    requestAnimationFrame(async () => {
+      // Measure the final English font before revealing the settled labels.
+      if (language.value === 'en') await document.fonts.load('600 12px "TeX Gyre Pagella"')
+      if (!map) return
+      layoutLabels()
+      introLabelsReady.value = true
+    })
   }
 
   introCameraFrame = requestAnimationFrame(step)
@@ -272,6 +287,7 @@ function startIntroCameraSequence() {
   if (!map || introSequenceStarted || !provinceLoadFinished) return
 
   introSequenceStarted = true
+  introLabelsReady.value = false
   map.invalidateSize({ pan: false, animate: false })
   setChinaOverview()
   requestAnimationFrame(() => layoutLabels())
@@ -382,6 +398,7 @@ function initMap() {
     .then(geo => {
       provinceLayer = L.geoJSON(geo, {
         pane: 'provPane',
+        noClip: true,
         style: () => ({
           color: PROV_STYLE.color,
           weight: PROV_STYLE.weight,
@@ -409,6 +426,9 @@ function initMap() {
       icon: createTeaLabelIcon(tea),
       title: teaText(tea, 'name'),
       interactive: true,
+      zIndexOffset: tea.isTop10 ? 10000 : 0,
+      riseOnHover: true,
+      riseOffset: 100000,
     })
 
     marker.on('mouseover', (e) => {
@@ -416,7 +436,7 @@ function initMap() {
         const el = marker.getElement()
         if (el) {
           el.classList.add('tea-marker--hover')
-          el.style.zIndex = 1000
+          marker.setZIndexOffset(100000)
         }
         hoveredTea.value = tea
         updatePreviewPos(marker)
@@ -434,7 +454,7 @@ function initMap() {
         const el = marker.getElement()
         if (el) {
           el.classList.remove('tea-marker--hover')
-          el.style.zIndex = ''
+          marker.setZIndexOffset(tea.isTop10 ? 10000 : 0)
         }
       }
       if (!selectedTea.value) {
@@ -512,193 +532,14 @@ function initMap() {
  *  4. 非组内标签仍用迭代推开策略
  */
 function layoutLabels() {
-  if (!map || markers.length === 0) return
-  const mapContainer = mapEl.value
-  if (!mapContainer) return
-  const mapRect = mapContainer.getBoundingClientRect()
-
-  const items = []
+  // Labels stay fixed above their geographic anchors at every zoom level.
   markers.forEach(marker => {
     const el = marker.getElement()
     if (!el) return
     const wrap = el.querySelector('.tea-label-wrap')
     const text = el.querySelector('.tea-label-text')
-    const ripple = el.querySelector('.tea-ripple')
-    if (!wrap || !text || !ripple) return
-
-    wrap.style.transform = ''
-
-    const labelRect = text.getBoundingClientRect()
-    const rippleRect = ripple.getBoundingClientRect()
-
-    const textL = labelRect.left - mapRect.left
-    const textT = labelRect.top - mapRect.top
-    const textW = labelRect.width
-    const textH = labelRect.height
-
-    const dotCX = rippleRect.left + rippleRect.width / 2 - mapRect.left
-    const dotCY = rippleRect.top + rippleRect.height / 2 - mapRect.top
-
-    items.push({
-      marker,
-      el,
-      wrap,
-      text,
-      dotCX,
-      dotCY,
-      x: textL,
-      y: textT,
-      w: textW,
-      h: textH,
-      offsetX: 0,
-      offsetY: 0,
-      clusterId: -1,
-    })
-  })
-
-  if (items.length === 0) return
-
-  // === 步骤 1：聚类（地理相近的点位归组） ===
-  // 阈值：当两个扩散圆心间距 < 80px 时视为一组，采用并查集传递性聚类
-  const PROX_THRESHOLD = 80
-  const parent = items.map((_, i) => i)
-  function find(i) {
-    while (parent[i] !== i) {
-      parent[i] = parent[parent[i]]
-      i = parent[i]
-    }
-    return i
-  }
-  function union(i, j) {
-    const ri = find(i)
-    const rj = find(j)
-    if (ri !== rj) parent[rj] = ri
-  }
-
-  for (let i = 0; i < items.length; i++) {
-    for (let j = i + 1; j < items.length; j++) {
-      const dx = items[i].dotCX - items[j].dotCX
-      const dy = items[i].dotCY - items[j].dotCY
-      const dist = Math.sqrt(dx * dx + dy * dy)
-      if (dist < PROX_THRESHOLD) union(i, j)
-    }
-  }
-
-  // 收集各组
-  const groupsMap = new Map()
-  items.forEach((it, i) => {
-    const root = find(i)
-    if (!groupsMap.has(root)) groupsMap.set(root, [])
-    groupsMap.get(root).push(it)
-    it.clusterId = root
-  })
-
-  // === 步骤 2：组内标签纵向堆叠 ===
-  const LABEL_GAP = 6 // 标签之间的最小垂直间距
-
-  groupsMap.forEach(group => {
-    if (group.length < 2) return // 单独一个，无需处理
-
-    // 按纬度从北到南排序
-    group.sort((a, b) => a.dotCY - b.dotCY)
-
-    // 计算组内所有标签的最大高度，统一用这个做堆叠间距
-    const maxH = Math.max(...group.map(g => g.h))
-    const rowStep = maxH + LABEL_GAP
-
-    // 第一行 (row=0) 直接贴在圆点上方（offsetY=0）
-    // 第二行 (row=1) 向上推 1 倍 rowStep，标签底部仍在 dotCY 附近
-    // 更稳妥的做法：每个标签的 bottom（y+h）距离 dotCY 至少 rowStep * row
-    // 由于标签默认在圆点上方 (labelBottom ≈ dotCY)，向上推 = 增加 offsetY 负值
-
-    // 策略：row=0 保持默认位置；row=1 上移 1*rowStep；row=2 上移 2*rowStep
-    // 但为了不让标签离圆点太远，改用「底部对齐」方式：
-    // 第 k 行标签的 y = 第 0 行标签的 y - k * rowStep
-    // 即 offsetY = -k * rowStep
-
-    // 找到该组内 "基准" 标签（row=0，dotCY 最小那个）
-    const baseY = group[0].y
-
-    group.forEach((it, idx) => {
-      if (idx === 0) return // 第一行不动
-      const targetY = baseY - idx * rowStep
-      const delta = targetY - it.y
-      it.offsetY += delta
-      it.y = targetY
-    })
-  })
-
-  // === 步骤 3：非组内标签（或组内标签堆叠后）仍可能有跨组重叠，做横向推开 ===
-  for (let pass = 0; pass < 6; pass++) {
-    let moved = false
-    for (let i = 0; i < items.length; i++) {
-      for (let j = i + 1; j < items.length; j++) {
-        const a = items[i]
-        const b = items[j]
-        const ax1 = a.x
-        const ay1 = a.y
-        const ax2 = a.x + a.w
-        const ay2 = a.y + a.h
-        const bx1 = b.x
-        const by1 = b.y
-        const bx2 = b.x + b.w
-        const by2 = b.y + b.h
-
-        const overlapX = ax1 < bx2 && ax2 > bx1
-        const overlapY = ay1 < by2 && ay2 > by1
-
-        if (overlapX && overlapY) {
-          const aCenterX = ax1 + a.w / 2
-          const bCenterX = bx1 + b.w / 2
-          const overlapH = Math.min(ax2, bx2) - Math.max(ax1, bx1)
-
-          // 横向推开（让两个标签左右错开）
-          const push = Math.ceil(overlapH / 2) + 4
-          if (push > 0) {
-            if (bCenterX > aCenterX) {
-              b.offsetX += push
-              b.x += push
-            } else {
-              b.offsetX -= push
-              b.x -= push
-            }
-            moved = true
-          }
-        }
-      }
-    }
-    if (!moved) break
-  }
-
-  // === 步骤 4：边界夹取 ===
-  items.forEach(it => {
-    const maxX = mapRect.width - it.w - 4
-    const minX = 4
-    if (it.x < minX) {
-      it.offsetX += (minX - it.x)
-      it.x = minX
-    } else if (it.x > maxX) {
-      it.offsetX -= (it.x - maxX)
-      it.x = maxX
-    }
-    const minY = 4
-    const maxY = mapRect.height - it.h - 4
-    if (it.y < minY) {
-      it.offsetY += (minY - it.y)
-      it.y = minY
-    } else if (it.y > maxY) {
-      it.offsetY -= (it.y - maxY)
-      it.y = maxY
-    }
-  })
-
-  // === 步骤 5：应用偏移量 ===
-  items.forEach(it => {
-    if (it.offsetX !== 0 || it.offsetY !== 0) {
-      it.wrap.style.transform = `translate(${it.offsetX}px, ${it.offsetY}px)`
-    } else {
-      it.wrap.style.transform = ''
-    }
+    if (wrap) wrap.style.transform = ''
+    if (text) text.style.transform = ''
   })
 }
 
@@ -708,7 +549,7 @@ function selectTea(tea, marker, style) {
     const prevEl = activeMarker.value.getElement()
     if (prevEl) {
       prevEl.classList.remove('tea-marker--active')
-      prevEl.style.zIndex = ''
+      activeMarker.value.setZIndexOffset(activeMarker.value._teaData?.isTop10 ? 10000 : 0)
     }
   }
 
@@ -719,7 +560,7 @@ function selectTea(tea, marker, style) {
   const el = marker.getElement()
   if (el) {
     el.classList.add('tea-marker--active')
-    el.style.zIndex = 1000
+    marker.setZIndexOffset(100000)
   }
 
   // 平移地图使标记可见
@@ -731,7 +572,7 @@ function closePanel() {
     const el = activeMarker.value.getElement()
     if (el) {
       el.classList.remove('tea-marker--active')
-      el.style.zIndex = ''
+      activeMarker.value.setZIndexOffset(activeMarker.value._teaData?.isTop10 ? 10000 : 0)
     }
   }
   selectedTea.value = null
@@ -961,7 +802,7 @@ onBeforeUnmount(() => {
 .map {
   width: 100%;
   height: 100%;
-  background: var(--c-paper-2);
+  background: #DDD5C0 !important;
 }
 
 /* 南海九段线插图已移除 */
@@ -1291,6 +1132,9 @@ onBeforeUnmount(() => {
 
 /* 标签文字容器（圆角矩形，在扩散圆上方） */
 :deep(.tea-label-text) {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .65s ease;
   background: rgba(250, 247, 239, 0.92);
   backdrop-filter: blur(4px);
   color: #3A4D38;
@@ -1307,6 +1151,11 @@ onBeforeUnmount(() => {
 }
 
 /* 十大名茶：标签更醒目 */
+.map.tea-labels-ready :deep(.tea-label-text) {
+  opacity: 1;
+  visibility: visible;
+}
+
 :deep(.tea-label--top10 .tea-ripple) {
   width: 22px;
   height: 22px;
